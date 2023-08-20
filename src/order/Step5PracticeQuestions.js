@@ -11,13 +11,23 @@ export default class Step5PracticeQuestions extends AbstractStep {
     constructor(props) {
         super(props)
 
+        /* If there's already data, reconstruct what years they were ordering from so that they can be shown their selections.
+         * This doesn't properly figure out which ones they chose "all packets" for, because the information necessary to do that isn't available (it's loaded in loadPackets()) and because that would be even more annoying than this already is.
+         */
+        const yearSelections = {}
+        if (props.data && props.data.packetOrders && props.data.packetOrders.length > 0) {
+            for (const order of props.data.packetOrders) {
+                yearSelections[order.packet.yearCode] = 'chooseSpecificPackets'
+            }
+        }
+
         this.state = {
             yearsByCode: null,
             packetsByYear: null,
             compilations: null,
 
-            orderPracticeQuestions: null,
-            yearSelections: {},
+            orderPracticeQuestions: props.data && ((props.data.packetOrders && props.data.packetOrders.length > 0) || (props.data.compilationOrders && props.data.compilationOrders.length > 0)) ? true : null,
+            yearSelections,
             packetIds: props.data && props.data.packetOrders ? props.data.packetOrders.map(it => it.packet.id) : [],
             compilationIds: props.data && props.data.compilationOrders ? props.data.compilationOrders.map(it => it.compilation.id) : [],
 
@@ -133,20 +143,12 @@ export default class Step5PracticeQuestions extends AbstractStep {
             return
         }
         
-        if (orderPracticeQuestions) {
-            const promises = []
-
-            if (packetIds.length > 0) {
-                promises.push(Api.post(`/bookings/${data.creationId}/practicePackets`, packetIds))
-            }
-
-            if (compilationIds.length > 0) {
-                promises.push(Api.post(`/bookings/${data.creationId}/practiceCompilations`, compilationIds))
-            }
-
-            await Promise.all(promises)
-            await dataReloader()
-        }
+        const promises = [
+            Api.post(`/bookings/${data.creationId}/practicePackets`, orderPracticeQuestions ? packetIds : []),
+            Api.post(`/bookings/${data.creationId}/practiceCompilations`, orderPracticeQuestions ? compilationIds : []),
+        ]
+        await Promise.all(promises)
+        await dataReloader()
         
         this.goToNextStep()
     }
@@ -281,9 +283,9 @@ export default class Step5PracticeQuestions extends AbstractStep {
 
                 {orderPracticeQuestions && (
                     <>
+                        <p>These questions have not been updated based on events that occurred after the questions were used in the year they were written for.</p>
                         {this.renderPackets()}
                         {this.renderCompilations()}
-                        <p>These questions have not been updated based on events that occurred after the questions were used in the year they were written for.</p>
                     </>
                 )}
 
