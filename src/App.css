@@ -1,0 +1,139 @@
+.App {
+	background-color: #f7f8f9;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+.App-header {
+	flex: 0;
+	background-color: #fff;
+	text-align: center;
+	padding: 1rem;
+}
+
+.App-logo {
+	width: 80%;
+	max-width: 400px;
+}
+
+.App-body {
+	flex: 1;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+}
+
+.App-body-inner {
+	width: 100%;
+	max-width: 1200px;
+	min-height: 100%;
+	background-color: white;
+	padding: 1rem;
+}
+
+.App-footer {
+	flex: 0;
+	padding: 0.5rem;
+	background-color: #55555e;
+	text-align: center;
+	color: #fff;
+	font-size: 15px;
+}
+
+.App-footer a {
+	color: inherit;
+	text-decoration: dotted underline;
+}
+
+.booking-step-header {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.booking-step-header h2 {
+	font-size: 1.5rem;
+}
+
+.form-error {
+	color: crimson;
+	font-weight: bold;
+}
+
+.form-warning {
+	color: goldenrod;
+	font-weight: bold;
+}
+
+.success {
+	color: green;
+	font-weight: bold;
+}
+
+.input-widget-container {
+	max-width: 500px;
+	margin-bottom: 2rem;
+}
+
+.input {
+	min-height: 2.5rem;
+}
+
+.input-label {
+	background-color: white;
+}
+
+.school-picker-option {
+	display: flex;
+	flex-direction: column;
+}
+
+.school-picker-option-main {
+	display: block;
+	margin-right: 1rem;
+	font-weight: bold;
+}
+
+.school-picker-option-secondary {
+	display: block;
+	font-size: 0.8rem;
+}
+
+.schools-chosen-for-conference, .non-conference-games {
+	margin-left: 0;
+}
+
+.schools-chosen-for-conference li, .non-conference-games li {
+	list-style-position: inside;
+}
+
+.order-review.invoice-wrapper {
+	max-width: 600px;
+}
+
+.order-review ul {
+	margin-left: 0;
+	list-style-type: none;
+}
+
+.order-review-key {
+	font-weight: bold;
+}
+
+span.order-review-key::after {
+	content: ':';
+}
+
+.invoice th, .invoice td {
+	padding: 0.25rem 0.5rem 0.25rem 0.25rem;
+}
+
+.invoice thead th {
+	font-weight: bold;
+}
+
+.invoice tfoot th, .invoice tfoot td {
+	font-size: 1rem;
+	font-weight: bold;
+}
