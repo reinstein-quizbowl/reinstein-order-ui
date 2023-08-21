@@ -165,7 +165,7 @@ class OrderFlowImpl extends React.PureComponent {
                     <>
                         <p>Thank you for your order!</p>
                         <p>We will be in touch soon. If you have any questions or concerns, please write to <Mailto />.</p>
-                        <Link to={`/order/${creationId}/invoice`}>
+                        <Link to={`/order/${data.creationId}/invoice`}>
                             <Button variant="contained">   
                                 View Invoice
                             </Button>
