@@ -2,9 +2,12 @@ import React from 'react'
 
 import { useParams } from 'react-router-dom'
 
-import Invoice from './Invoice'
+import dayjs from 'dayjs'
+
+import InvoiceLinesTable from './InvoiceLinesTable'
 import Api from '../api/Api'
 import Loading from '../util-components/Loading'
+import Mailto from '../util-components/Mailto'
 
 const STATUSES_FOR_WHICH_INVOICE_CAN_BE_DISPLAYED = ['submitted', 'approved', 'shipped']
 
@@ -41,7 +44,34 @@ class InvoicePageImpl extends React.PureComponent {
             return <p>This invoice is not available.</p>
         }
 
-        return <Invoice lines={booking.invoiceLines} />
+        return (
+            <>
+                <p>Thank you for your order!</p>
+
+                <p>
+                    <strong>School:</strong> {booking.school.name}
+                    <br />
+                    <strong>Placed by:</strong> {booking.name}
+                    <br />
+                    <strong>Order Number:</strong> {booking.invoiceLabel}
+                    <br />
+                    <strong>Date:</strong> {dayjs(booking.createdAt).format('dddd, MMMM D, YYYY')}
+                </p>
+
+                <InvoiceLinesTable lines={booking.invoiceLines} />
+
+                <p>Please send a check made out to <strong>Reinstein QuizBowl</strong> to&hellip;</p>
+                
+                <address>
+                    Reinstein QuizBowl<br />
+                    PO Box 57<br />
+                    125 Schelter Rd<br />
+                    Lincolnshire, IL 60069&ndash;0057
+                </address>
+
+                <p>If you have any questions or problems, please write to <Mailto />.</p>
+            </>
+        )
     }
 }
 

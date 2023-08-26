@@ -137,3 +137,12 @@ span.order-review-key::after {
 	font-size: 1rem;
 	font-weight: bold;
 }
+
+address {
+	font-style: normal;
+	padding-left: 1rem;
+}
+
+p + address {
+	margin-top: -1.5rem; /* undo the spacing between paragraphs */
+}

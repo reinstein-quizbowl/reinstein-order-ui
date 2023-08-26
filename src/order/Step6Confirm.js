@@ -8,7 +8,7 @@ import { Edit } from '@mui/icons-material'
 import '../App.css'
 import AbstractStep from './AbstractStep'
 import Api from '../api/Api'
-import Invoice from '../invoice/Invoice'
+import InvoiceLinesTable from '../invoice/InvoiceLinesTable'
 import { makeEnglishList } from '../util/util'
 
 export default class Step6Confirm extends AbstractStep {
@@ -148,7 +148,7 @@ export default class Step6Confirm extends AbstractStep {
 
                 <section className="order-review invoice-wrapper">
                     <h2>Invoice Preview</h2>
-                    <Invoice lines={invoiceLines} />
+                    <InvoiceLinesTable lines={invoiceLines} />
                 </section>
 
                 <form onSubmit={this.handleSubmit}>

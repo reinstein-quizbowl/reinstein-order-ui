@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableFooter, TableHead, TableRow } from '@
 import { formatMoney } from '../util/util'
 import Loading from '../util-components/Loading'
 
-export default class Invoice extends React.PureComponent {
+export default class InvoiceLinesTable extends React.PureComponent {
     renderLine = line => (
         <TableRow key={line.id}>
             <TableCell component="th">
