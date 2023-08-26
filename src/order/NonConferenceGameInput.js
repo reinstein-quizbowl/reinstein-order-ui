@@ -1,13 +1,11 @@
 import React from 'react'
 
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormLabel } from '@mui/material'
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
 
 import SchoolPicker from '../util-components/SchoolPicker'
 
 const initialState = (props) => ({
-    date: '',
     school1Id: props.baseSchool ? props.baseSchool.id : null,
     school2Id: null,
     school3Id: null,
@@ -22,9 +20,7 @@ export default class NonConferenceGameInput extends React.PureComponent {
     }
 
     determineError = () => {
-        const { date, school1Id, school2Id, school3Id } = this.state
-
-        if (!date) return 'Please tell us the date of this game.'
+        const { school1Id, school2Id, school3Id } = this.state
 
         if (!school1Id || !school2Id) return 'Please tell us the schools that will be playing this game.'
 
@@ -43,7 +39,7 @@ export default class NonConferenceGameInput extends React.PureComponent {
         e.preventDefault()
 
         const { onSubmit } = this.props
-        const { date, school1Id, school2Id, school3Id } = this.state
+        const { school1Id, school2Id, school3Id } = this.state
 
         const error = this.determineError()
         if (error) {
@@ -54,7 +50,7 @@ export default class NonConferenceGameInput extends React.PureComponent {
             if (school2Id) schoolIds.push(Number(school2Id))
             if (school3Id) schoolIds.push(Number(school3Id))
 
-            onSubmit({ date, schoolIds })
+            onSubmit({ schoolIds })
             this.handleClose()
         }
     }
@@ -63,7 +59,7 @@ export default class NonConferenceGameInput extends React.PureComponent {
 
     render() {
         const { open, schools, year, baseSchool } = this.props
-        const { date, school1Id, school2Id, school3Id, showError } = this.state
+        const { school1Id, school2Id, school3Id, showError } = this.state
 
         const error = this.determineError()
         
@@ -76,26 +72,7 @@ export default class NonConferenceGameInput extends React.PureComponent {
             >
                 <form onSubmit={this.handleSubmit}>
                     <DialogTitle>Add a Game</DialogTitle>
-                    <DialogContent style={{ minHeight: 500 /* to give room for the DatePicker popover */ }}>
-                        <div className="input-widget-container">
-                            <FormControl>
-                                <FormLabel id="dateLabel" htmlFor="date" required>
-                                    What is the date of this game?
-                                </FormLabel>
-                                <DatePicker
-                                    id="date"
-                                    aria-labelledby="dateLabel"
-                                    value={date ? dayjs(date) : null}
-                                    onChange={date => this.setState({ date })}
-                                    required
-                                    minDate={dayjs().add(1, 'week')}
-                                    maxDate={dayjs(year.endDate)}
-                                    inputProps={{ className: 'date-input' }}
-                                    autoFocus
-                                />
-                            </FormControl>
-                        </div>
-                        
+                    <DialogContent>
                         <div className="input-widget-container">
                             <SchoolPicker
                                 id="school1Id"

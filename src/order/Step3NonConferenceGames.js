@@ -98,7 +98,7 @@ export default class Step3NonConferenceGames extends AbstractStep {
 
     renderNonConferenceGame = (game, index) => (
         <li key={index}>
-            {dayjs(game.date).format('dddd, MMMM D, YYYY')}: {this.renderSchoolShortNames(game.schoolIds)}
+            {this.renderSchoolShortNames(game.schoolIds)}
             <Tooltip title="Delete">
                 <IconButton onClick={() => this.handleDeleteGame(index)} size="small">
                     <Close />

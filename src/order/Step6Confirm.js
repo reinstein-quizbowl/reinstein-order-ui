@@ -106,7 +106,7 @@ export default class Step6Confirm extends AbstractStep {
 
     renderNonConferenceGame = game => (
         <section key={game.id}>
-            <h3>{dayjs(game.date).format('dddd, MMMM D, YYYY')}: Packet {game.assignedPacket ? game.assignedPacket.number : 'TBD'}</h3>
+            <h3>Packet {game.assignedPacket ? game.assignedPacket.number : 'TBD'}</h3>
             <ul>
                 {game.schoolIds.map(this.renderSchoolListItem)}
             </ul>
