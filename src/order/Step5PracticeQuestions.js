@@ -23,11 +23,13 @@ export default class Step5PracticeQuestions extends AbstractStep {
 
         this.state = {
             yearsByCode: null,
+            stateSeries: null,
             packetsByYear: null,
             compilations: null,
 
             orderPracticeQuestions: props.data && ((props.data.packetOrders && props.data.packetOrders.length > 0) || (props.data.compilationOrders && props.data.compilationOrders.length > 0)) ? true : null,
             yearSelections,
+            stateSeriesIds: props.data && props.data.stateSeriesOrders ? props.data.stateSeriesOrders.map(it => it.stateSeries.id) : [],
             packetIds: props.data && props.data.packetOrders ? props.data.packetOrders.map(it => it.packet.id) : [],
             compilationIds: props.data && props.data.compilationOrders ? props.data.compilationOrders.map(it => it.compilation.id) : [],
 
@@ -37,6 +39,7 @@ export default class Step5PracticeQuestions extends AbstractStep {
 
     componentDidMount() {
         this.loadYears()
+        this.loadStateSeries()
         this.loadPackets()
         this.loadCompilations()
     }
@@ -52,6 +55,13 @@ export default class Step5PracticeQuestions extends AbstractStep {
         }
 
         this.setState({ yearsByCode })
+    }
+
+    loadStateSeries = async () => {
+        if (this.state.stateSeries) return
+
+        const stateSeries = await Api.get(`/stateSeries`)
+        this.setState({ stateSeries })
     }
 
     loadPackets = async () => {
@@ -111,6 +121,16 @@ export default class Step5PracticeQuestions extends AbstractStep {
         }
     }
 
+    toggleStateSeries = (stateSeriesId) => this.setState(prevState => {
+        const oldstateSeriesIds = prevState.stateSeriesIds
+
+        if (oldstateSeriesIds.includes(stateSeriesId)) {
+            return { stateSeriesIds: oldstateSeriesIds.filter(it => it !== stateSeriesId) }
+        } else {
+            return { stateSeriesIds: [stateSeriesId, ...oldstateSeriesIds]}
+        }
+    })
+
     togglePacket = (packetId) => this.setState(prevState => {
         const oldPacketIds = prevState.packetIds
 
@@ -135,7 +155,7 @@ export default class Step5PracticeQuestions extends AbstractStep {
         e.preventDefault()
 
         const { data, dataReloader } = this.props
-        const { orderPracticeQuestions, packetIds, compilationIds } = this.state
+        const { orderPracticeQuestions, stateSeriesIds, packetIds, compilationIds } = this.state
         
         const error = this.determineError()
         if (error) {
@@ -144,6 +164,7 @@ export default class Step5PracticeQuestions extends AbstractStep {
         }
         
         const promises = [
+            Api.post(`/bookings/${data.creationId}/stateSeries`, orderPracticeQuestions ? stateSeriesIds : []),
             Api.post(`/bookings/${data.creationId}/practicePackets`, orderPracticeQuestions ? packetIds : []),
             Api.post(`/bookings/${data.creationId}/practiceCompilations`, orderPracticeQuestions ? compilationIds : []),
         ]
@@ -159,6 +180,40 @@ export default class Step5PracticeQuestions extends AbstractStep {
         if (!isBoolean(orderPracticeQuestions)) return 'Please tell us whether you want to order practice questions.'
 
         return null
+    }
+
+    renderStateSeries = () => {
+        const { stateSeries } = this.state
+        if (!stateSeries) return null
+
+        return (
+            <div className="input-widget-container">
+                <FormControl>
+                    <FormLabel id="stateSeriesLabel">
+                        Questions from past years&rsquo; IESA State Series
+                    </FormLabel>
+                    <FormGroup>
+                        {stateSeries.map(this.renderStateSeriesCheckbox)}
+                    </FormGroup>
+                </FormControl>
+            </div>
+        )
+    }
+
+    renderStateSeriesCheckbox = (stateSeries) => {
+        const { stateSeriesIds } = this.state
+
+        const parenthetical = stateSeries.description ?
+            `${stateSeries.description}; ${formatMoney(stateSeries.price)}` :
+            formatMoney(stateSeries.price)
+
+        return (
+            <FormControlLabel
+                key={stateSeries.id}
+                control={<Checkbox checked={stateSeriesIds.includes(stateSeries.id)} onChange={() => this.toggleStateSeries(stateSeries.id)} name="stateSeriesId" value={stateSeries.id} />}
+                label={`${stateSeries.name} (${parenthetical})`}
+            />
+        )
     }
 
     renderPackets = () => {
@@ -180,7 +235,7 @@ export default class Step5PracticeQuestions extends AbstractStep {
             <div key={year.code} className="input-widget-container">
                 <FormControl>
                     <FormLabel id={`${year.code}Label`}>
-                        Questions from {year.name.replace('-', '–')}
+                        Regular-season questions from {year.name.replace('-', '–')}
                     </FormLabel>
                     <RadioGroup
                         aria-labelledby={`${year.code}Label`}
@@ -234,7 +289,7 @@ export default class Step5PracticeQuestions extends AbstractStep {
                         Questions by Category
                     </FormLabel>
                     <FormGroup>
-                        {compilations.map(compilation => this.renderCompilationCheckbox(compilation))}
+                        {compilations.map(this.renderCompilationCheckbox)}
                     </FormGroup>
                 </FormControl>
             </div>
@@ -284,6 +339,7 @@ export default class Step5PracticeQuestions extends AbstractStep {
                 {orderPracticeQuestions && (
                     <>
                         <p>These questions have not been updated based on events that occurred after the questions were used in the year they were written for.</p>
+                        {this.renderStateSeries()}
                         {this.renderPackets()}
                         {this.renderCompilations()}
                     </>
