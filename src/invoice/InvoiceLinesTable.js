@@ -7,7 +7,7 @@ import Loading from '../util-components/Loading'
 
 export default class InvoiceLinesTable extends React.PureComponent {
     renderLine = line => (
-        <TableRow key={line.id}>
+        <TableRow key={line.id || line.label}>{/* line.id is null for the synthetic items used in previewing */}
             <TableCell component="th">
                 {line.label}
                 {Number(line.quantity) > 1 && ` (${line.quantity} @ ${formatMoney(line.unitCost)} each)`}
