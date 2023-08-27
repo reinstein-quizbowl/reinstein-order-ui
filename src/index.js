@@ -3,7 +3,8 @@ import ReactDOM from 'react-dom/client'
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { ErrorBoundary } from 'react-error-boundary'
-import { LocalizationProvider } from '@mui/x-date-pickers';
+import { CssBaseline, ThemeProvider } from '@mui/material'
+import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
 import './index.css'
@@ -13,6 +14,7 @@ import RouterErrorBoundary from './error/RouterErrorBoundary'
 import InvoicePage from './invoice/InvoicePage'
 import OrderFlow from './order/OrderFlow'
 import PacketAssignments from './packet-assignments/PacketAssignments'
+import { theme } from './util/theme'
 import Loading from './util-components/Loading'
 import reportWebVitals from './reportWebVitals'
 
@@ -54,7 +56,10 @@ root.render(
 	<React.StrictMode>
 		<ErrorBoundary fallback={<ErrorPage />}>
 			<LocalizationProvider dateAdapter={AdapterDayjs}>
-				<RouterProvider router={router} fallbackElement={<Loading />} />
+				<ThemeProvider theme={theme}>
+					<CssBaseline />
+					<RouterProvider router={router} fallbackElement={<Loading />} />
+				</ThemeProvider>
 			</LocalizationProvider>
 		</ErrorBoundary>
 	</React.StrictMode>
