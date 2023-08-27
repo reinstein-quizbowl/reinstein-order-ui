@@ -1,7 +1,6 @@
 import React from 'react'
 
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormLabel } from '@mui/material'
-import dayjs from 'dayjs'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material'
 
 import SchoolPicker from '../util-components/SchoolPicker'
 
@@ -58,7 +57,7 @@ export default class NonConferenceGameInput extends React.PureComponent {
     handleClose = () => this.setState(initialState(this.props), this.props.onClose)
 
     render() {
-        const { open, schools, year, baseSchool } = this.props
+        const { open, schools, baseSchool } = this.props
         const { school1Id, school2Id, school3Id, showError } = this.state
 
         const error = this.determineError()
