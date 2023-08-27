@@ -57,17 +57,17 @@
 }
 
 .form-error {
-	color: crimson;
+	color: #dc143c; /* equivalent to the named color 'crimson'; duplicated in theme */
 	font-weight: bold;
 }
 
 .form-warning {
-	color: goldenrod;
+	color: #daa520; /* equivalent to the named color 'goldenrod'; duplicated in theme */
 	font-weight: bold;
 }
 
 .success {
-	color: green;
+	color: #008000; /* equivalent to the named color 'green'; duplicated in theme */
 	font-weight: bold;
 }
 
@@ -76,12 +76,22 @@
 	margin-bottom: 2rem;
 }
 
-.input {
+input.input {
 	min-height: 2.5rem;
+	color: black; /* slightly blacker than body text */
 }
 
-.input-label {
+/* .input-label { CHECK: can this be removed?
+	color: black;
 	background-color: white;
+} */
+
+label {
+	margin-bottom: 0.25rem;
+}
+
+label.radio-or-checkbox {
+	margin-bottom: 0;
 }
 
 .school-picker-option {
@@ -102,10 +112,26 @@
 
 .schools-chosen-for-conference, .non-conference-games {
 	margin-left: 0;
+	margin-bottom: 0;
 }
 
 .schools-chosen-for-conference li, .non-conference-games li {
 	list-style-position: inside;
+}
+
+.practice-questions-group {
+	margin-bottom: 2rem;
+}
+
+.practice-questions-group h3 {
+	font-size: 1.5rem;
+	margin-bottom: 0;
+}
+
+.practice-questions-group h4 {
+	font-size: 1.25rem;
+	margin-top: 1rem;
+	margin-bottom: 0;
 }
 
 .order-review.invoice-wrapper {

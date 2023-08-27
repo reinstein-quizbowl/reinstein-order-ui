@@ -156,7 +156,7 @@ export default class Step6Confirm extends AbstractStep {
                 <form onSubmit={this.handleSubmit}>
                     <div className="input-widget-container">
                         <FormControl>
-                            <FormLabel id="requestsW9Label" required>
+                            <FormLabel id="requestsW9Label">
                                 Do you need a Form W-9?
                             </FormLabel>
                             <RadioGroup
@@ -165,24 +165,28 @@ export default class Step6Confirm extends AbstractStep {
                                 value={requestsW9}
                                 onChange={this.handleBooleanChange}
                             >
-                                <FormControlLabel value="true" control={<Radio />} label="Yes" />
-                                <FormControlLabel value="false" control={<Radio />} label="No" />
+                                <FormControlLabel value="true" control={<Radio />} label="Yes" className="radio-or-checkbox" />
+                                <FormControlLabel value="false" control={<Radio />} label="No" className="radio-or-checkbox" />
                             </RadioGroup>
                         </FormControl>
                     </div>
-                
+
                     <div className="input-widget-container">
-                        <TextField
-                            id="externalNote"
-                            name="externalNote"
-                            value={externalNote}
-                            onChange={this.handleTextFieldChange}
-                            inputProps={{ className: 'input' }}
-                            label="Is there anything else we should know?"
-                            InputLabelProps={{ shrink: true, className: 'input-label' }}
-                            multiline
-                            fullWidth
-                        />
+                        <FormControl fullWidth>
+                            <FormLabel id="externalNoteLabel" htmlFor="externalNote">
+                                Is there anything else we should know?
+                            </FormLabel>
+                            <TextField
+                                aria-labelledby="externalNoteLabel"
+                                id="externalNote"
+                                name="externalNote"
+                                value={externalNote}
+                                onChange={this.handleTextFieldChange}
+                                inputProps={{ className: 'input' }}
+                                multiline
+                                fullWidth
+                            />
+                        </FormControl>
                     </div>
 
                     {showError && <p className="form-error">{error}</p>}

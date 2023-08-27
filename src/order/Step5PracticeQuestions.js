@@ -195,16 +195,16 @@ export default class Step5PracticeQuestions extends AbstractStep {
         if (!stateSeries) return null
 
         return (
-            <div className="input-widget-container">
+            <section id="state-series" className="practice-questions-group">
                 <FormControl>
                     <FormLabel id="stateSeriesLabel">
-                        Questions from past years&rsquo; IESA State Series
+                        <h3>IESA State Series questions from past years</h3>
                     </FormLabel>
                     <FormGroup>
                         {stateSeries.map(this.renderStateSeriesCheckbox)}
                     </FormGroup>
                 </FormControl>
-            </div>
+            </section>
         )
     }
 
@@ -220,6 +220,7 @@ export default class Step5PracticeQuestions extends AbstractStep {
                 key={stateSeries.id}
                 control={<Checkbox checked={stateSeriesIds.includes(stateSeries.id)} onChange={() => this.toggleStateSeries(stateSeries.id)} name="stateSeriesId" value={stateSeries.id} />}
                 label={`${stateSeries.name} (${parenthetical})`}
+                className="radio-or-checkbox"
             />
         )
     }
@@ -229,7 +230,12 @@ export default class Step5PracticeQuestions extends AbstractStep {
         if (!yearsByCode || !packetsByYear) return null
 
         const years = Object.values(yearsByCode).sort((a, b) => b.code.localeCompare(a.code)) // most recent first
-        return years.map(year => this.renderPacketsForYear(year, packetsByYear[year.code]))
+        return (
+            <section id="regular-season" className="practice-questions-group">
+                <h3>Regular-season questions from past years</h3>
+                {years.map(year => this.renderPacketsForYear(year, packetsByYear[year.code]))}
+            </section>
+        )
     }
 
     renderPacketsForYear = (year, packets) => {
@@ -240,10 +246,10 @@ export default class Step5PracticeQuestions extends AbstractStep {
         const chooseSpecificPacketsLabel = distinctPrices.size === 1 ? `Choose specific packets (${formatMoney(packets[0].priceAsPracticeMaterial)} each)` : 'Choose specific packets'
 
         return (
-            <div key={year.code} className="input-widget-container">
+            <section id={`regular-season-${year.code}`} key={year.code}>
                 <FormControl>
                     <FormLabel id={`${year.code}Label`}>
-                        Regular-season questions from {year.name.replace('-', '–')}
+                        <h4>Regular-season questions from {year.name.replace('-', '–')}</h4>
                     </FormLabel>
                     <RadioGroup
                         aria-labelledby={`${year.code}Label`}
@@ -251,13 +257,28 @@ export default class Step5PracticeQuestions extends AbstractStep {
                         value={yearSelections[year.code] || null}
                         onChange={this.handleYearSelectionChange}
                     >
-                        <FormControlLabel value="allPackets" control={<Radio />} label={<>All packets ({formatMoney(year.maximumPacketPracticeMaterialPrice)})</>} />
-                        <FormControlLabel value="chooseSpecificPackets" control={<Radio />} label={chooseSpecificPacketsLabel} />
+                        <FormControlLabel
+                            value="allPackets"
+                            control={<Radio />}
+                            label={<>All packets ({formatMoney(year.maximumPacketPracticeMaterialPrice)})</>}
+                            className="radio-or-checkbox"
+                        />
+                        <FormControlLabel
+                            value="chooseSpecificPackets"
+                            control={<Radio />}
+                            label={chooseSpecificPacketsLabel}
+                            className="radio-or-checkbox"
+                        />
                         {yearSelections[year.code] === 'chooseSpecificPackets' && this.renderSpecificPacketsChooser(packets, distinctPrices.size === 1)}
-                        <FormControlLabel value="none" control={<Radio />} label="None" />
+                        <FormControlLabel
+                            value="none"
+                            control={<Radio />}
+                            label="None"
+                            className="radio-or-checkbox"
+                        />
                     </RadioGroup>
                 </FormControl>
-            </div>
+            </section>
         )
     }
 
@@ -282,6 +303,7 @@ export default class Step5PracticeQuestions extends AbstractStep {
                 key={packet.id}
                 control={<Checkbox checked={packetIds.includes(packet.id)} onChange={() => this.togglePacket(packet.id)} name="packetId" value={packet.id} />}
                 label={label}
+                className="radio-or-checkbox"
             />
         )
     }
@@ -291,16 +313,17 @@ export default class Step5PracticeQuestions extends AbstractStep {
         if (!compilations) return null
 
         return (
-            <div className="input-widget-container">
+            <section id="compilations" className="practice-questions-group">
                 <FormControl>
                     <FormLabel id="compilationsLabel">
-                        Questions by Category
+                        <h3>Questions by Category</h3>
                     </FormLabel>
                     <FormGroup>
                         {compilations.map(this.renderCompilationCheckbox)}
                     </FormGroup>
+                    <p>These some of the same questions as are in the regular-season and/or State Series sets, organized by category.</p>
                 </FormControl>
-            </div>
+            </section>
         )
     }
 
@@ -316,6 +339,7 @@ export default class Step5PracticeQuestions extends AbstractStep {
                 key={compilation.id}
                 control={<Checkbox checked={compilationIds.includes(compilation.id)} onChange={() => this.toggleCompilation(compilation.id)} name="compilationId" value={compilation.id} />}
                 label={`${compilation.name} (${parenthetical})`}
+                className="radio-or-checkbox"
             />
         )
     }
@@ -338,8 +362,8 @@ export default class Step5PracticeQuestions extends AbstractStep {
                             value={orderPracticeQuestions}
                             onChange={this.handleBooleanChange}
                         >
-                            <FormControlLabel value="true" control={<Radio />} label="Yes" />
-                            <FormControlLabel value="false" control={<Radio />} label="No" />
+                            <FormControlLabel value="true" control={<Radio />} label="Yes" className="radio-or-checkbox" />
+                            <FormControlLabel value="false" control={<Radio />} label="No" className="radio-or-checkbox" />
                         </RadioGroup>
                     </FormControl>
                 </div>

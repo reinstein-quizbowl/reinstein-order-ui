@@ -97,7 +97,6 @@ const SchoolPicker = props => {
                     autoFocus={props.autoFocus}
                 />
             )}
-            className="input-widget-container"
         />
     )
 }

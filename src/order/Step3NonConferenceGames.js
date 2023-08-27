@@ -146,8 +146,8 @@ export default class Step3NonConferenceGames extends AbstractStep {
                             value={orderNonConferenceGames}
                             onChange={this.handleBooleanChange}
                         >
-                            <FormControlLabel value="true" control={<Radio />} label="Yes" />
-                            <FormControlLabel value="false" control={<Radio />} label="No" />
+                            <FormControlLabel value="true" control={<Radio />} label="Yes" className="radio-or-checkbox" />
+                            <FormControlLabel value="false" control={<Radio />} label="No" className="radio-or-checkbox" />
                         </RadioGroup>
                     </FormControl>
                 </div>

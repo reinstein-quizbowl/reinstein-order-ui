@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormLabel } from '@mui/material'
 
 import SchoolPicker from '../util-components/SchoolPicker'
 
@@ -73,37 +73,52 @@ export default class NonConferenceGameInput extends React.PureComponent {
                     <DialogTitle>Add a Game</DialogTitle>
                     <DialogContent>
                         <div className="input-widget-container">
-                            <SchoolPicker
-                                id="school1Id"
-                                value={schools.find(it => it.id === school1Id) || null}
-                                schools={schools}
-                                onChange={this.handleSetSchool1}
-                                label="Tell us one of the schools that will be playing this game."
-                                showDistanceFrom={baseSchool}
-                            />
+                            <FormControl fullWidth>
+                                <FormLabel id="school1IdLabel" htmlFor="school1Id" required>
+                                    Tell us one of the schools that will be playing this game.
+                                </FormLabel>
+                                <SchoolPicker
+                                    id="school1Id"
+                                    aria-labelledby="school1IdLabel"
+                                    value={schools.find(it => it.id === school1Id) || null}
+                                    schools={schools}
+                                    onChange={this.handleSetSchool1}
+                                    showDistanceFrom={baseSchool}
+                                />
+                            </FormControl>
                         </div>
-                        
+
                         <div className="input-widget-container">
-                            <SchoolPicker
-                                id="school2Id"
-                                value={schools.find(it => it.id === school2Id) || null}
-                                schools={schools}
-                                onChange={this.handleSetSchool2}
-                                label="Tell us the other school that will be playing this game."
-                                showDistanceFrom={baseSchool}
-                            />
+                            <FormControl fullWidth>
+                                <FormLabel id="school2IdLabel" htmlFor="school2Id" required>
+                                    Tell us the other school that will be playing this game.
+                                </FormLabel>
+                                <SchoolPicker
+                                    id="school2Id"
+                                    aria-labelledby="school2IdLabel"
+                                    value={schools.find(it => it.id === school2Id) || null}
+                                    schools={schools}
+                                    onChange={this.handleSetSchool2}
+                                    showDistanceFrom={baseSchool}
+                                />
+                            </FormControl>
                         </div>
-                        
+
                         <div className="input-widget-container">
-                            <SchoolPicker
-                                id="school3Id"
-                                value={schools.find(it => it.id === school3Id) || null}
-                                schools={schools}
-                                onChange={this.handleSetSchool3}
-                                label="Will another school be present for this game? If so, which?"
-                                showAddSchoolHelperText
-                                showDistanceFrom={baseSchool}
-                            />
+                            <FormControl fullWidth>
+                                <FormLabel id="school3IdLabel" htmlFor="school3Id" required>
+                                    Will another school be present for this game? If so, which?
+                                </FormLabel>
+                                <SchoolPicker
+                                    id="school3Id"
+                                    aria-labelledby="school3IdLabel"
+                                    value={schools.find(it => it.id === school3Id) || null}
+                                    schools={schools}
+                                    onChange={this.handleSetSchool3}
+                                    showDistanceFrom={baseSchool}
+                                    showAddSchoolHelperText
+                                />
+                            </FormControl>
                         </div>
 
                         {showError && <p className="form-error">{error}</p>}

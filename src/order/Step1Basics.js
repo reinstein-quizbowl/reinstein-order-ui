@@ -103,43 +103,59 @@ export default class Step1Basics extends AbstractStep {
 
         return (
             <form onSubmit={this.handleSubmit}>
-                <SchoolPicker
-                    value={schoolId ? schoolsById[schoolId] : null}
-                    schools={Object.values(schoolsById)}
-                    onChange={this.handleSchoolChange}
-                    label="What school are you placing this order on behalf of?"
-                    helperText={<>If your school is not listed, please write to <Mailto />.</>}
-                    autoFocus
-                />
-                
                 <div className="input-widget-container">
-                    <TextField
-                        id="name"
-                        name="name"
-                        value={name}
-                        onChange={this.handleTextFieldChange}
-                        inputProps={{ className: 'input' }}
-                        label="What is your name?"
-                        InputLabelProps={{ shrink: true, className: 'input-label' }}
-                        inputRef={this.nameInputRef}
-                        required
-                        fullWidth
-                    />
+                    <FormControl fullWidth>
+                        <FormLabel id="schoolLabel" htmlFor="school" required>
+                            What school are you placing this order on behalf of?
+                        </FormLabel>
+                        <SchoolPicker
+                            id="school"
+                            aria-labelledby="schoolLabel"
+                            value={schoolId ? schoolsById[schoolId] : null}
+                            schools={Object.values(schoolsById)}
+                            onChange={this.handleSchoolChange}
+                            helperText={<>If your school is not listed, please write to <Mailto />.</>}
+                            autoFocus
+                        />
+                    </FormControl>
                 </div>
-                
+
                 <div className="input-widget-container">
-                    <TextField
-                        id="emailAddress"
-                        name="emailAddress"
-                        type="email"
-                        value={emailAddress}
-                        onChange={this.handleTextFieldChange}
-                        inputProps={{ className: 'input' }}
-                        label="What is your email address?"
-                        InputLabelProps={{ shrink: true, className: 'input-label' }}
-                        required
-                        fullWidth
-                    />
+                    <FormControl fullWidth>
+                        <FormLabel id="nameLabel" htmlFor="name" required>
+                            What is your name?
+                        </FormLabel>
+                        <TextField
+                            aria-labelledby="nameLabel"
+                            id="name"
+                            name="name"
+                            value={name}
+                            onChange={this.handleTextFieldChange}
+                            inputProps={{ className: 'input' }}
+                            inputRef={this.nameInputRef}
+                            required
+                            fullWidth
+                        />
+                    </FormControl>
+                </div>
+
+                <div className="input-widget-container">
+                    <FormControl fullWidth>
+                        <FormLabel id="emailLabel" htmlFor="email" required>
+                            What is your email address?
+                        </FormLabel>
+                        <TextField
+                            aria-labelledby="emailLabel"
+                            id="emailAddress"
+                            name="emailAddress"
+                            type="email"
+                            value={emailAddress}
+                            onChange={this.handleTextFieldChange}
+                            inputProps={{ className: 'input' }}
+                            required
+                            fullWidth
+                        />
+                    </FormControl>
                 </div>
 
                 <div className="input-widget-container">
@@ -153,8 +169,8 @@ export default class Step1Basics extends AbstractStep {
                             value={isCoach}
                             onChange={this.handleBooleanChange}
                         >
-                            <FormControlLabel value="true" control={<Radio />} label="Yes" />
-                            <FormControlLabel value="false" control={<Radio />} label="No" />
+                            <FormControlLabel value="true" control={<Radio />} label="Yes" className="radio-or-checkbox" />
+                            <FormControlLabel value="false" control={<Radio />} label="No" className="radio-or-checkbox" />
                         </RadioGroup>
                     </FormControl>
                 </div>
@@ -171,8 +187,8 @@ export default class Step1Basics extends AbstractStep {
                                 value={coachKnows}
                                 onChange={this.handleBooleanChange}
                             >
-                                <FormControlLabel value="true" control={<Radio />} label="Yes" />
-                                <FormControlLabel value="false" control={<Radio />} label="No" />
+                                <FormControlLabel value="true" control={<Radio />} label="Yes" className="radio-or-checkbox" />
+                                <FormControlLabel value="false" control={<Radio />} label="No" className="radio-or-checkbox" />
                             </RadioGroup>
                         </FormControl>
                     </div>

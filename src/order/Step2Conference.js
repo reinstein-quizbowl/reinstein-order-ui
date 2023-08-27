@@ -168,8 +168,8 @@ export default class Step2Conference extends AbstractStep {
                             value={orderingForConference}
                             onChange={this.handleOrderingForConferenceChange}
                         >
-                            <FormControlLabel value="true" control={<Radio />} label="Yes" />
-                            <FormControlLabel value="false" control={<Radio />} label="No" />
+                            <FormControlLabel value="true" control={<Radio />} label="Yes" className="radio-or-checkbox" />
+                            <FormControlLabel value="false" control={<Radio />} label="No" className="radio-or-checkbox" />
                         </RadioGroup>
                     </FormControl>
                 </div>
@@ -177,17 +177,21 @@ export default class Step2Conference extends AbstractStep {
                 {orderingForConference && (
                     <>
                         <div className="input-widget-container">
-                            <TextField
-                                id="conferenceName"
-                                name="conferenceName"
-                                value={conferenceName}
-                                onChange={this.handleChange}
-                                inputProps={{ className: 'input' }}
-                                label="What is the name of the conference?"
-                                InputLabelProps={{ shrink: true, className: 'input-label' }}
-                                required
-                                fullWidth
-                            />
+                            <FormControl fullWidth>
+                                <FormLabel id="conferenceNameLabel" htmlFor="email" required>
+                                    What is the name of the conference?
+                                </FormLabel>
+                                <TextField
+                                    aria-labelledby="conferenceNameLabel"
+                                    id="conferenceName"
+                                    name="conferenceName"
+                                    value={conferenceName}
+                                    onChange={this.handleChange}
+                                    inputProps={{ className: 'input' }}
+                                    required
+                                    fullWidth
+                                />
+                            </FormControl>
                         </div>
 
                         <FormLabel required>
@@ -209,19 +213,23 @@ export default class Step2Conference extends AbstractStep {
                         </div>
 
                         <div className="input-widget-container">
-                            <TextField
-                                id="packetsRequested"
-                                name="packetsRequested"
-                                type="number"
-                                value={packetsRequested || ''}
-                                onChange={this.handleChange}
-                                inputProps={{ className: 'input', min: 2, max: packets.length }}
-                                label="How many packets (rounds’ worth of questions) do you want to order?"
-                                InputLabelProps={{ shrink: true, className: 'input-label' }}
-                                required
-                                fullWidth
-                            />
-                            <p>{this.renderPriceExplanation()}</p>
+                            <FormControl fullWidth>
+                                <FormLabel id="packetsRequestedLabel" htmlFor="email" required>
+                                    How many packets (rounds’ worth of questions) do you want to order?
+                                </FormLabel>
+                                <TextField
+                                    aria-labelledby="packetsRequestedLabel"
+                                    id="packetsRequested"
+                                    name="packetsRequested"
+                                    type="number"
+                                    value={packetsRequested || ''}
+                                    onChange={this.handleChange}
+                                    inputProps={{ className: 'input', min: 2, max: packets.length }}
+                                    required
+                                    fullWidth
+                                    helperText={this.renderPriceExplanation()}
+                                />
+                            </FormControl>
                         </div>
                     </>
                 )}
