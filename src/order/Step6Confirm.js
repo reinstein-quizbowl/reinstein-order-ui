@@ -34,8 +34,8 @@ export default class Step6Confirm extends AbstractStep {
     }
 
     loadInvoiceLines = async () => {
-        const { data } = this.props
-        const invoiceLines = await Api.get(`/bookings/${data.creationId}/invoicePreview`)
+        const { data, onError } = this.props
+        const invoiceLines = await Api.get(`/bookings/${data.creationId}/invoicePreview`, onError)
         this.setState({ invoiceLines })
     }
 
@@ -50,7 +50,7 @@ export default class Step6Confirm extends AbstractStep {
     handleSubmit = async (e) => {
         e.preventDefault()
 
-        const { data, dataReloader } = this.props
+        const { data, dataReloader, onError } = this.props
         const { externalNote, requestsW9 } = this.state
         
         const error = this.determineError()
@@ -58,7 +58,7 @@ export default class Step6Confirm extends AbstractStep {
             this.setState({ showError: true })
         } else {
             await Api.post(`/bookings/${data.creationId}`, { externalNote, requestsW9 })
-            const submitted = await Api.post(`/bookings/${data.creationId}/submit`, { externalNote, requestsW9 })
+            const submitted = await Api.post(`/bookings/${data.creationId}/submit`, { externalNote, requestsW9 }, onError)
             await dataReloader(submitted)
         }
     }

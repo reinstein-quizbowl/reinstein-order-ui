@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { Link, useParams } from 'react-router-dom'
+import { useErrorBoundary } from 'react-error-boundary'
 
 import { Button } from '@mui/material'
 
@@ -17,8 +18,9 @@ import Mailto from '../util-components/Mailto'
 
 const OrderFlow = (props) => {
     const params = useParams()
+    const { showBoundary: handleError } = useErrorBoundary()
 
-    return <OrderFlowImpl creationId={params.creationId} {...props} />
+    return <OrderFlowImpl creationId={params.creationId} onError={handleError} {...props} />
 }
 
 export default OrderFlow
@@ -50,24 +52,28 @@ class OrderFlowImpl extends React.PureComponent {
     }
 
     loadBooking = async () => {
-        const { creationId } = this.props
+        const { creationId, onError } = this.props
         if (creationId) {
-            const data = await Api.get(`/bookings/${creationId}`)
-            this.setState({ data })
+            const data = await Api.get(`/bookings/${creationId}`, onError)
+            await setStatePromise(this, { data })
         }
     }
 
     loadCurrentYear = async () => {
+        const { onError } = this.props
+
         if (this.state.year) return
 
-        const year = await Api.get('/years/current')
+        const year = await Api.get('/years/current', onError)
         await setStatePromise(this, { year })
     }
 
     loadSchools = async () => {
+        const { onError } = this.props
+
         if (this.state.schoolsById) return
 
-        const schools = await Api.get('/schools/active')
+        const schools = await Api.get('/schools/active', onError)
         const schoolsById = {}
         for (const school of schools) {
             schoolsById[school.id] = school
@@ -77,20 +83,24 @@ class OrderFlowImpl extends React.PureComponent {
     }
 
     loadPackets = async () => {
+        const { onError } = this.props
+
         if (this.state.packets) return
 
-        const packets = await Api.get(`/packets?filter=availableForCompetition`)
+        const packets = await Api.get(`/packets?filter=availableForCompetition`, onError)
         await setStatePromise(this, { packets })
     }
 
     // If you already have the data, just pass it in. Otherwise, this will do its own load.
     handleReloadData = async (data) => {
+        const { onError } = this.props
+
         if (data) {
             await setStatePromise(this, { data })
         } else {
             const { creationId } = this.state.data
-
-            const updated = await Api.get(`/bookings/${creationId}`)
+            
+            const updated = await Api.get(`/bookings/${creationId}`, onError)
             await setStatePromise(this, { data: updated })
         }
 
@@ -132,16 +142,17 @@ class OrderFlowImpl extends React.PureComponent {
     }
 
     handleGoToStep = async (targetStep) => {
+        const { onError } = this.props
         const { data, currentStep } = this.state
 
         if (data.invoiceLines && data.invoiceLines.length > 0 && targetStep < 6) {
             // They're going to a step before the invoice was calculated, so it is presumed they will make changes that will eventually necessitate recalculation of the invoice. We delete the invoice for now.
-            await Api.delete(`/bookings/${data.creationId}/invoice`)
+            await Api.delete(`/bookings/${data.creationId}/invoice`, onError)
         }
 
         if (currentStep >= 4 && targetStep < 4) {
             // They're going to a step before the packets were assigned, so it is presumed they will make steps that will eventually necessitate reassignment of packets. We delete the assignments for now.
-            await Api.delete(`/bookings/${data.creationId}/packetAssignments`)
+            await Api.delete(`/bookings/${data.creationId}/packetAssignments`, onError)
         }
 
         this.setState({ currentStep: targetStep })
@@ -150,7 +161,7 @@ class OrderFlowImpl extends React.PureComponent {
     handleStepExpansionToggle = targetStep => (event, isExpanded) => this.handleGoToStep(targetStep)
     
     render() {
-        const { creationId } = this.props
+        const { creationId, onError } = this.props
         const { year, schoolsById, packets, data, currentStep } = this.state
 
         const missingBooking = creationId && !data
@@ -195,6 +206,7 @@ class OrderFlowImpl extends React.PureComponent {
             packets,
             data,
             dataReloader: this.handleReloadData,
+            onError,
         }
 
         return (

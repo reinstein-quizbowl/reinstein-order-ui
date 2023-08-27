@@ -66,7 +66,7 @@ export default class Step2Conference extends AbstractStep {
     handleSubmit = async (e) => {
         e.preventDefault()
 
-        const { data, dataReloader } = this.props
+        const { data, dataReloader, onError } = this.props
         const { orderingForConference, conferenceName, packetsRequested } = this.state
         
         const error = this.determineError()
@@ -76,7 +76,7 @@ export default class Step2Conference extends AbstractStep {
         }
 
         if (orderingForConference) {
-            const updated = await Api.post(`/bookings/${data.creationId}/conference`, { name: conferenceName, packetsRequested, schoolIds: this.getAllSchoolIds() })
+            const updated = await Api.post(`/bookings/${data.creationId}/conference`, { name: conferenceName, packetsRequested, schoolIds: this.getAllSchoolIds() }, onError)
             await dataReloader(updated)
         }
 

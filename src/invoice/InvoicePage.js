@@ -1,11 +1,13 @@
 import React from 'react'
 
 import { useParams } from 'react-router-dom'
+import { useErrorBoundary } from 'react-error-boundary'
 
 import dayjs from 'dayjs'
 
 import InvoiceLinesTable from './InvoiceLinesTable'
 import Api from '../api/Api'
+import { setStatePromise } from '../util/util'
 import Loading from '../util-components/Loading'
 import Mailto from '../util-components/Mailto'
 
@@ -13,8 +15,9 @@ const STATUSES_FOR_WHICH_INVOICE_CAN_BE_DISPLAYED = ['submitted', 'approved', 's
 
 const InvoicePage = (props) => {
     const params = useParams()
+    const { showBoundary: handleError } = useErrorBoundary()
 
-    return <InvoicePageImpl creationId={params.creationId} {...props} />
+    return <InvoicePageImpl creationId={params.creationId} onError={handleError} {...props} />
 }
 
 class InvoicePageImpl extends React.PureComponent {
@@ -27,10 +30,10 @@ class InvoicePageImpl extends React.PureComponent {
     }
 
     async componentDidMount() {
-        const { creationId } = this.props
+        const { creationId, onError } = this.props
         if (creationId) {
-            const booking = await Api.get(`/bookings/${creationId}`)
-            this.setState({ booking })
+            const booking = await Api.get(`/bookings/${creationId}`, onError)
+            await setStatePromise(this, { booking })
         }
 
         document.title = 'Invoice \u2013 Reinstein QuizBowl'

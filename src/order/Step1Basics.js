@@ -45,7 +45,7 @@ export default class Step1Basics extends AbstractStep {
     handleSubmit = async (e) => {
         e.preventDefault()
 
-        const { data, schoolsById, dataReloader } = this.props
+        const { data, schoolsById, dataReloader, onError } = this.props
         const { schoolId, name, emailAddress, isCoach, coachKnows } = this.state
         
         const error = this.determineError()
@@ -69,7 +69,7 @@ export default class Step1Basics extends AbstractStep {
                 window.history.pushState(null, null, `/order/${creationId}`)
             }
     
-            const updated = await Api.post(`/bookings/${creationId}`, { school: schoolsById[schoolId], name, emailAddress, authority })
+            const updated = await Api.post(`/bookings/${creationId}`, { school: schoolsById[schoolId], name, emailAddress, authority }, onError)
             await dataReloader(updated)
             this.goToNextStep()
         }

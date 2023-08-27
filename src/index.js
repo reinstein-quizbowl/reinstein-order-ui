@@ -2,11 +2,12 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { ErrorBoundary } from 'react-error-boundary'
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
 import './index.css'
-import ErrorBoundary from './error/ErrorBoundary'
+import ErrorPage from './error/ErrorPage'
 import NotFound from './error/NotFound'
 import RouterErrorBoundary from './error/RouterErrorBoundary'
 import InvoicePage from './invoice/InvoicePage'
@@ -51,7 +52,7 @@ const router = createBrowserRouter([
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
 	<React.StrictMode>
-		<ErrorBoundary>
+		<ErrorBoundary fallback={<ErrorPage />}>
 			<LocalizationProvider dateAdapter={AdapterDayjs}>
 				<RouterProvider router={router} fallbackElement={<Loading />} />
 			</LocalizationProvider>

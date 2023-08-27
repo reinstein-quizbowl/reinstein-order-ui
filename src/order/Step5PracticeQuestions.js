@@ -45,9 +45,11 @@ export default class Step5PracticeQuestions extends AbstractStep {
     }
 
     loadYears = async () => {
+        const { onError } = this.props
+
         if (this.state.yearsByCode) return
 
-        const years = await Api.get(`/years`)
+        const years = await Api.get(`/years`, onError)
 
         const yearsByCode = {}
         for (const year of years) {
@@ -58,16 +60,20 @@ export default class Step5PracticeQuestions extends AbstractStep {
     }
 
     loadStateSeries = async () => {
+        const { onError } = this.props
+
         if (this.state.stateSeries) return
 
-        const stateSeries = await Api.get(`/stateSeries`)
+        const stateSeries = await Api.get(`/stateSeries`, onError)
         this.setState({ stateSeries })
     }
 
     loadPackets = async () => {
+        const { onError } = this.props
+
         if (this.state.packetsByYear) return
 
-        const packets = await Api.get(`/packets?filter=availableForPractice`)
+        const packets = await Api.get(`/packets?filter=availableForPractice`, onError)
 
         const packetsByYear = {}
         for (const packet of packets) {
@@ -82,9 +88,11 @@ export default class Step5PracticeQuestions extends AbstractStep {
     }
 
     loadCompilations = async () => {
+        const { onError } = this.props
+
         if (this.state.compilations) return
 
-        const compilations = await Api.get(`/compilations`)
+        const compilations = await Api.get(`/compilations`, onError)
         this.setState({ compilations })
     }
 
@@ -154,7 +162,7 @@ export default class Step5PracticeQuestions extends AbstractStep {
     handleSubmit = async (e) => {
         e.preventDefault()
 
-        const { data, dataReloader } = this.props
+        const { data, dataReloader, onError } = this.props
         const { orderPracticeQuestions, stateSeriesIds, packetIds, compilationIds } = this.state
         
         const error = this.determineError()
@@ -164,9 +172,9 @@ export default class Step5PracticeQuestions extends AbstractStep {
         }
         
         const promises = [
-            Api.post(`/bookings/${data.creationId}/stateSeries`, orderPracticeQuestions ? stateSeriesIds : []),
-            Api.post(`/bookings/${data.creationId}/practicePackets`, orderPracticeQuestions ? packetIds : []),
-            Api.post(`/bookings/${data.creationId}/practiceCompilations`, orderPracticeQuestions ? compilationIds : []),
+            Api.post(`/bookings/${data.creationId}/stateSeries`, orderPracticeQuestions ? stateSeriesIds : [], onError),
+            Api.post(`/bookings/${data.creationId}/practicePackets`, orderPracticeQuestions ? packetIds : [], onError),
+            Api.post(`/bookings/${data.creationId}/practiceCompilations`, orderPracticeQuestions ? compilationIds : [], onError),
         ]
         await Promise.all(promises)
         await dataReloader()

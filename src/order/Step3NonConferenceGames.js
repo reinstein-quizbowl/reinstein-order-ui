@@ -36,12 +36,12 @@ export default class Step3NonConferenceGames extends AbstractStep {
     handleAddGame =  newGame => this.setState(prevState => ({ nonConferenceGames: [...prevState.nonConferenceGames, newGame] }))
 
     handleDeleteGame = async deleteIndex => {
-        const { data } = this.props
+        const { data, onError } = this.props
 
         const game = this.state.nonConferenceGames[deleteIndex]
         if (game.id) {
             // It's a game that has already been saved, so we need to delete it from the server
-            await Api.delete(`/bookings/${data.creationId}/nonConferenceGames/${game.id}`)
+            await Api.delete(`/bookings/${data.creationId}/nonConferenceGames/${game.id}`, onError)
         }
 
         // Either way, we also need to remove it from state
@@ -61,7 +61,7 @@ export default class Step3NonConferenceGames extends AbstractStep {
     handleSubmit = async (e) => {
         e.preventDefault()
 
-        const { data, dataReloader } = this.props
+        const { data, dataReloader, onError } = this.props
         const { orderNonConferenceGames, nonConferenceGames } = this.state
         
         const error = this.determineError()
@@ -74,13 +74,13 @@ export default class Step3NonConferenceGames extends AbstractStep {
             const newGames = nonConferenceGames.filter(it => !it.id)
 
             if (newGames.length > 0) {
-                const reloadedData = await Api.post(`/bookings/${data.creationId}/nonConferenceGames`, newGames)
+                const reloadedData = await Api.post(`/bookings/${data.creationId}/nonConferenceGames`, newGames, onError)
                 await dataReloader(reloadedData)
             }
         } else {
             const gamesToDelete = nonConferenceGames.filter(it => !!it.id)
             for (const game of gamesToDelete) {
-                await Api.delete(`/bookings/${data.creationId}/nonConferenceGames/${game.id}`)
+                await Api.delete(`/bookings/${data.creationId}/nonConferenceGames/${game.id}`, onError)
             }
         }
         
