@@ -152,6 +152,8 @@ export default class Step3NonConferenceGames extends AbstractStep {
                     </FormControl>
                 </div>
 
+                <p>Each packet (i.e., each game) costs $15 if there is no third school watching the game. If a third school is watching the game, each packet costs $20 because that packet can&rsquo;t be used for other games involving that school.</p>
+
                 {orderNonConferenceGames && (
                     <>
                         {this.renderNonConferenceGames()}

@@ -129,6 +129,26 @@ export default class Step2Conference extends AbstractStep {
         )
     }
 
+    renderPriceExplanation = () => {
+        const { otherSchoolIds } = this.state
+
+        const schoolsListed = otherSchoolIds.length + 1 // for the school that's placing the order
+
+        switch (schoolsListed) {
+            case 1:
+            case 2:
+                return 'The cost per packet is $15 if there are exactly three schools in your conference, $20 if there are exactly four, $25 if there are exactly five, and $30 if there are six or more.'
+            case 3:
+                return 'If there are exactly three schools in your conference, each packet costs $15. The cost will change if there are more schools in your conference.'
+            case 4:
+                return 'If there are exactly four schools in your conference, each packet costs $20. The cost will change if there are more schools in your conference.'
+            case 5:
+                return 'If there are exactly five schools in your conference, each packet costs $25. The cost will change if there are more schools in your conference.'
+            default:
+                return 'Since there are more than five schools in your conference, each packet costs $30.'
+        }
+    }
+
     renderBody = () => {
         const { data, schoolsById, packets } = this.props
         const { orderingForConference, conferenceName, otherSchoolIds, packetsRequested, showError } = this.state
@@ -201,6 +221,7 @@ export default class Step2Conference extends AbstractStep {
                                 required
                                 fullWidth
                             />
+                            <p>{this.renderPriceExplanation()}</p>
                         </div>
                     </>
                 )}
