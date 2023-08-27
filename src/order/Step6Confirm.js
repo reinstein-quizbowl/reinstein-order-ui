@@ -98,17 +98,21 @@ export default class Step6Confirm extends AbstractStep {
 
     renderNonConferenceGames = (games) => {
         if (!games || games.length === 0) return <p>None</p>
-
-        return games.map(this.renderNonConferenceGame)
+        
+        return (
+            <>
+                <ul>
+                    {games.map(this.renderNonConferenceGame)}
+                </ul>
+            </>
+        )
     }
 
     renderNonConferenceGame = game => (
-        <section key={game.id}>
-            <h3>Packet {game.assignedPacket ? game.assignedPacket.number : 'TBD'}</h3>
-            <ul>
-                {game.schoolIds.map(this.renderSchoolListItem)}
-            </ul>
-        </section>
+        <li key={game.id}>
+            {makeEnglishList(game.schoolIds.map(id => this.props.schoolsById[id].shortName))}:{' '}
+            Packet {game.assignedPacket ? game.assignedPacket.number : 'TBD'}
+        </li>
     )
 
     renderBody = () => {

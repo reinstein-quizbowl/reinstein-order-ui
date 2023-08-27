@@ -14,8 +14,8 @@ export default class Step3NonConferenceGames extends AbstractStep {
         super(props)
 
         this.state = {
-            orderNonConferenceGames: null,
-            nonConferenceGames: [],
+            orderNonConferenceGames: props.data && props.data.nonConferenceGames && props.data.nonConferenceGames.length > 0 ? true : null,
+            nonConferenceGames: props.data && props.data.nonConferenceGames ? [...props.data.nonConferenceGames] : [],
             adding: false,
             showError: false,
         }
@@ -35,17 +35,28 @@ export default class Step3NonConferenceGames extends AbstractStep {
 
     handleAddGame =  newGame => this.setState(prevState => ({ nonConferenceGames: [...prevState.nonConferenceGames, newGame] }))
 
-    handleDeleteGame = deleteIndex => this.setState((prevState) => {
-        const old = prevState.nonConferenceGames
-        const nonConferenceGames = []
-        for (let i = 0; i < old.length; ++i) {
-            if (i !== deleteIndex) {
-                nonConferenceGames.push(old[i])
-            }
+    handleDeleteGame = async deleteIndex => {
+        const { data } = this.props
+
+        const game = this.state.nonConferenceGames[deleteIndex]
+        if (game.id) {
+            // It's a game that has already been saved, so we need to delete it from the server
+            await Api.delete(`/bookings/${data.creationId}/nonConferenceGames/${game.id}`)
         }
 
-        return { nonConferenceGames }
-    })
+        // Either way, we also need to remove it from state
+        this.setState((prevState) => {
+            const old = prevState.nonConferenceGames
+            const nonConferenceGames = []
+            for (let i = 0; i < old.length; ++i) {
+                if (i !== deleteIndex) {
+                    nonConferenceGames.push(old[i])
+                }
+            }
+
+            return { nonConferenceGames }
+        })
+    }
 
     handleSubmit = async (e) => {
         e.preventDefault()
@@ -60,8 +71,17 @@ export default class Step3NonConferenceGames extends AbstractStep {
         }
 
         if (orderNonConferenceGames) {
-            const reloadedData = await Api.post(`/bookings/${data.creationId}/nonConferenceGames`, nonConferenceGames)
-            await dataReloader(reloadedData)
+            const newGames = nonConferenceGames.filter(it => !it.id)
+
+            if (newGames.length > 0) {
+                const reloadedData = await Api.post(`/bookings/${data.creationId}/nonConferenceGames`, newGames)
+                await dataReloader(reloadedData)
+            }
+        } else {
+            const gamesToDelete = nonConferenceGames.filter(it => !!it.id)
+            for (const game of gamesToDelete) {
+                await Api.delete(`/bookings/${data.creationId}/nonConferenceGames/${game.id}`)
+            }
         }
         
         this.goToNextStep()
