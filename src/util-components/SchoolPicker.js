@@ -89,6 +89,7 @@ const SchoolPicker = props => {
                     {...params}
                     label={props.label}
                     helperText={helperText}
+                    placeholder={props.placeholder}
                     inputProps={{
                         ...params.inputProps,
                         autoComplete: 'new-password', // disable autocomplete and autofill

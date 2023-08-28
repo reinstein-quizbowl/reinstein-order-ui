@@ -13,13 +13,12 @@ export default class Step2Conference extends AbstractStep {
     constructor(props) {
         super(props)
 
-        this.state = {
+        this.state = Object.assign({}, this.state, {
             orderingForConference: props.orderingForConference || (props.data && props.data.conference) ? true : null,
             conferenceName: props.data && props.data.conference ? props.data.conference.name : '',
             otherSchoolIds: props.data && props.data.conference ? props.data.conference.schoolIds.filter(it => it !== props.data.school.id) : [],
             packetsRequested: props.data && props.data.conference ? props.data.conference.packetsRequested : null,
-            showError: false,
-        }
+        })
     }
 
     getStepNumber = () => 2
@@ -76,8 +75,10 @@ export default class Step2Conference extends AbstractStep {
         }
 
         if (orderingForConference) {
+            await this.setBusy(true)
             const updated = await Api.post(`/bookings/${data.creationId}/conference`, { name: conferenceName, packetsRequested, schoolIds: this.getAllSchoolIds() }, onError)
             await dataReloader(updated)
+            await this.setBusy(false)
         }
 
         this.goToNextStep()
@@ -206,7 +207,7 @@ export default class Step2Conference extends AbstractStep {
                                 value={null}
                                 schools={Object.values(schoolsById)}
                                 onChange={this.handleAddSchool}
-                                label="Add a school"
+                                label="Add a school&hellip;"
                                 showAddSchoolHelperText
                                 showDistanceFrom={data.school}
                             />

@@ -13,12 +13,11 @@ export default class Step3NonConferenceGames extends AbstractStep {
     constructor(props) {
         super(props)
 
-        this.state = {
+        this.state = Object.assign({}, this.state, {
             orderNonConferenceGames: props.data && props.data.nonConferenceGames && props.data.nonConferenceGames.length > 0 ? true : null,
             nonConferenceGames: props.data && props.data.nonConferenceGames ? [...props.data.nonConferenceGames] : [],
             adding: false,
-            showError: false,
-        }
+        })
     }
 
     getStepNumber = () => 3
@@ -41,7 +40,9 @@ export default class Step3NonConferenceGames extends AbstractStep {
         const game = this.state.nonConferenceGames[deleteIndex]
         if (game.id) {
             // It's a game that has already been saved, so we need to delete it from the server
+            await this.setBusy(true)
             await Api.delete(`/bookings/${data.creationId}/nonConferenceGames/${game.id}`, onError)
+            await this.setBusy(false)
         }
 
         // Either way, we also need to remove it from state
@@ -70,6 +71,8 @@ export default class Step3NonConferenceGames extends AbstractStep {
             return
         }
 
+        await this.setBusy(true)
+
         if (orderNonConferenceGames) {
             const newGames = nonConferenceGames.filter(it => !it.id)
 
@@ -85,6 +88,7 @@ export default class Step3NonConferenceGames extends AbstractStep {
         }
         
         this.goToNextStep()
+        await this.setBusy(false)
     }
 
     determineError = () => {

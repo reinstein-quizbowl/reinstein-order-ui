@@ -15,10 +15,9 @@ export default class Step4CheckPacketAvailability extends AbstractStep {
     constructor(props) {
         super(props)
 
-        this.state = {
-            busy: false,
+        this.state = Object.assign({}, this.state, {
             potentialAssignments: null,
-        }
+        })
     }
 
     componentDidMount() {
@@ -40,7 +39,7 @@ export default class Step4CheckPacketAvailability extends AbstractStep {
     checkAvailability = async () => {
         const { data, onError } = this.props
 
-        await setStatePromise(this, { busy: true })
+        await this.setBusy(true)
 
         const potentialAssignments = await Api.get(`/bookings/${data.creationId}/potentialPacketAssignments`, onError)
         await setStatePromise(this, { potentialAssignments, busy: false })
@@ -56,10 +55,11 @@ export default class Step4CheckPacketAvailability extends AbstractStep {
         }
 
         if (potentialAssignments.length > 0) {
-            await setStatePromise(this, { busy: true })
+            await this.setBusy(true)
 
             const updated = await Api.post(`/bookings/${data.creationId}/packetAssignments`, potentialAssignments, onError)
             await dataReloader(updated)
+            await this.setBusy(false)
         }
 
         this.goToNextStep()

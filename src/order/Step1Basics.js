@@ -22,14 +22,13 @@ export default class Step1Basics extends AbstractStep {
     constructor(props) {
         super(props)
 
-        this.state = {
+        this.state = Object.assign({}, this.state, {
             schoolId: props.data && props.data.school ? props.data.school.id : null,
             name: props.data && props.data.name ? props.data.name : '',
             emailAddress: props.data && props.data.emailAddress ? props.data.emailAddress : '',
             isCoach: props.data && props.data.authority ? props.data.authority === AUTHORITIES.coach : null,
             coachKnows: props.data && props.data.authority ? props.data.authority === AUTHORITIES.coachKnows : null,
-            showError: false,
-        }
+        })
     }
 
     getStepNumber = () => 1
@@ -52,6 +51,8 @@ export default class Step1Basics extends AbstractStep {
         if (error) {
             this.setState({ showError: true })
         } else {
+            await this.setBusy(true)
+
             let authority
             if (isCoach) {
                 authority = AUTHORITIES.coach
@@ -72,6 +73,7 @@ export default class Step1Basics extends AbstractStep {
             const updated = await Api.post(`/bookings/${creationId}`, { school: schoolsById[schoolId], name, emailAddress, authority }, onError)
             await dataReloader(updated)
             this.goToNextStep()
+            await this.setBusy(false)
         }
     }
 
@@ -114,6 +116,7 @@ export default class Step1Basics extends AbstractStep {
                             value={schoolId ? schoolsById[schoolId] : null}
                             schools={Object.values(schoolsById)}
                             onChange={this.handleSchoolChange}
+                            placeholder="Choose school&hellip;"
                             helperText={<>If your school is not listed, please write to <Mailto />.</>}
                             autoFocus
                         />

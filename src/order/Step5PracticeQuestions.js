@@ -21,7 +21,7 @@ export default class Step5PracticeQuestions extends AbstractStep {
             }
         }
 
-        this.state = {
+        this.state = Object.assign({}, this.state, {
             yearsByCode: null,
             stateSeries: null,
             packetsByYear: null,
@@ -32,9 +32,7 @@ export default class Step5PracticeQuestions extends AbstractStep {
             stateSeriesIds: props.data && props.data.stateSeriesOrders ? props.data.stateSeriesOrders.map(it => it.stateSeries.id) : [],
             packetIds: props.data && props.data.packetOrders ? props.data.packetOrders.map(it => it.packet.id) : [],
             compilationIds: props.data && props.data.compilationOrders ? props.data.compilationOrders.map(it => it.compilation.id) : [],
-
-            showError: false,
-        }
+        })
     }
 
     componentDidMount() {
@@ -43,6 +41,8 @@ export default class Step5PracticeQuestions extends AbstractStep {
         this.loadPackets()
         this.loadCompilations()
     }
+
+    isBusy = () => this.state.busy || !this.state.yearsByCode || !this.state.stateSeries || !this.state.packetsByYear || !this.state.compilations
 
     loadYears = async () => {
         const { onError } = this.props
@@ -170,6 +170,8 @@ export default class Step5PracticeQuestions extends AbstractStep {
             this.setState({ showError: true })
             return
         }
+
+        await this.setBusy(true)
         
         const promises = [
             Api.post(`/bookings/${data.creationId}/stateSeries`, orderPracticeQuestions ? stateSeriesIds : [], onError),
@@ -180,6 +182,7 @@ export default class Step5PracticeQuestions extends AbstractStep {
         await dataReloader()
         
         this.goToNextStep()
+        await this.setBusy(false)
     }
 
     determineError = () => {

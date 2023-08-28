@@ -3,7 +3,19 @@ import React from 'react'
 import { Accordion, AccordionDetails, AccordionSummary, Typography } from '@mui/material'
 import { CheckCircle, RadioButtonChecked, RadioButtonUnchecked } from '@mui/icons-material'
 
+import Loading from '../util-components/Loading'
+import { setStatePromise } from '../util/util'
+
 export default class AbstractStep extends React.PureComponent {
+    constructor(props) {
+        super(props)
+
+        this.state = {
+            busy: false,
+            showError: false,
+        }
+    }
+
     getStepNumber = () => {
         console.warn('Must override getStepNumber() in ' + this.constructor.name)
         return -1
@@ -19,11 +31,25 @@ export default class AbstractStep extends React.PureComponent {
         return null
     }
 
+    setBusy = async (busy) => {
+        await setStatePromise(this, { busy })
+    }
+
     goToNextStep = () => this.props.onGoToStep(this.getStepNumber() + 1)
 
     wasExpanded = props => props.currentStep === this.getStepNumber()
 
     isExpanded = () => this.wasExpanded(this.props)
+
+    isBusy = () => this.state.busy // can be overridden if busyness involves other state variables
+
+    renderBusyOverlay = () => (
+        <div className="busy-overlay">
+            <div className="busy-overlay-inner">
+                <Loading />
+            </div>
+        </div>
+    )
 
     render() {
         const { highestSeenStep, onToggleExpansion } = this.props
@@ -47,6 +73,7 @@ export default class AbstractStep extends React.PureComponent {
                     <Typography variant="h2">{this.getTitle()}</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
+                    {this.isBusy() && this.renderBusyOverlay()}
                     {this.renderBody()}
                 </AccordionDetails>
             </Accordion>

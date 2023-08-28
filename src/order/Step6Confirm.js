@@ -13,12 +13,11 @@ export default class Step6Confirm extends AbstractStep {
     constructor(props) {
         super(props)
 
-        this.state = {
+        this.state = Object.assign({}, this.state, {
             invoiceLines: null,
             externalNote: props.data ? (props.data.externalNote || '') : '',
             requestsW9: props.data ? !!props.data.requestsW9 : false,
-            showError: false,
-        }
+        })
     }
 
     componentDidMount() {
@@ -32,6 +31,8 @@ export default class Step6Confirm extends AbstractStep {
             this.loadInvoiceLines()
         }
     }
+
+    isBusy = () => this.state.busy || !this.state.invoiceLines
 
     loadInvoiceLines = async () => {
         const { data, onError } = this.props
@@ -57,9 +58,11 @@ export default class Step6Confirm extends AbstractStep {
         if (error) {
             this.setState({ showError: true })
         } else {
+            await this.setBusy(true)
             await Api.post(`/bookings/${data.creationId}`, { externalNote, requestsW9 })
             const submitted = await Api.post(`/bookings/${data.creationId}/submit`, { externalNote, requestsW9 }, onError)
             await dataReloader(submitted)
+            await this.setBusy(false)
         }
     }
 
