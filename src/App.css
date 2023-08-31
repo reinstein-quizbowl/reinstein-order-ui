@@ -46,6 +46,10 @@
 	text-decoration: dotted underline;
 }
 
+details p {
+	margin-bottom: 0;
+}
+
 .booking-step-header {
 	display: flex;
 	flex-direction: row;
@@ -189,4 +193,20 @@ p + address {
 	justify-content: center;
 	width: 100%;
 	height: 100%;
+}
+
+.status-filter-option {
+	padding-right: 1rem;
+}
+
+.booking-summary-row {
+	cursor: pointer;
+}
+
+.MuiTooltip-tooltip p {
+	margin-bottom: 0;
+}
+
+.MuiTooltip-tooltip ul, .MuiTooltip-tooltip ol {
+	margin-left: 0.5rem;
 }
