@@ -8,7 +8,6 @@ import '../App.css'
 import AbstractStep from './AbstractStep'
 import Api from '../api/Api'
 import { setStatePromise } from '../util/util'
-import Loading from '../util-components/Loading'
 import Mailto from '../util-components/Mailto'
 
 export default class Step4CheckPacketAvailability extends AbstractStep {
@@ -31,6 +30,8 @@ export default class Step4CheckPacketAvailability extends AbstractStep {
             this.checkAvailability()
         }
     }
+
+    isBusy = () => this.state.busy || !this.state.potentialAssignments
 
     getStepNumber = () => 4
 
@@ -83,14 +84,12 @@ export default class Step4CheckPacketAvailability extends AbstractStep {
             if (potentialAssignments) {
                 return (
                     <>
-                        <Loading />
                         <p>Assigning packets&hellip;</p>
                     </>
                 )
             } else {
                 return (
                     <>
-                        <Loading />
                         <p>Checking to make sure we have fresh questions available for your order&hellip;</p>
                     </>
                 )
