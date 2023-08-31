@@ -8,6 +8,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
 import './index.css'
+import Login from './auth/Login'
 import ErrorPage from './error/ErrorPage'
 import NotFound from './error/NotFound'
 import RouterErrorBoundary from './error/RouterErrorBoundary'
@@ -42,6 +43,11 @@ const router = createBrowserRouter([
 	{
 		path: '/packetAssignments',
 		element: <PacketAssignments />,
+		ErrorBoundary: RouterErrorBoundary,
+	},
+	{
+		path: '/login',
+		element: <Login />,
 		ErrorBoundary: RouterErrorBoundary,
 	},
 	{

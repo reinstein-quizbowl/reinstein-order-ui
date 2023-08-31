@@ -1,9 +1,23 @@
+import Auth from '../auth/Auth'
+
 const VALID_POST_RESPONSES = [200, 201, 202]
 
 export default class Api {
+    static _getAuthHeader = () => {
+        const user = Auth.getUser()
+        if (user) {
+            return { Authorization: `Bearer ${user.token}` }
+        } else {
+            return {}
+        }
+    }
+
     static get = async (path, onError) => {
         try {
-            const response = await fetch(process.env.REACT_APP_API_BASE + path)
+            const response = await fetch(process.env.REACT_APP_API_BASE + path, {
+                method: 'GET',
+                headers: this._getAuthHeader(),
+            })
 
             if (response.status === 200) {
                 const json = await response.json()
@@ -26,7 +40,7 @@ export default class Api {
                 method: 'POST',
                 mode: 'cors',
                 cache: 'no-cache',
-                headers: { 'Content-type': 'application/json' },
+                headers: { 'Content-type': 'application/json', ...this._getAuthHeader() },
                 body: JSON.stringify(body),
             })
 
@@ -51,7 +65,7 @@ export default class Api {
                 method: 'DELETE',
                 mode: 'cors',
                 cache: 'no-cache',
-                headers: { 'Content-type': 'application/json' },
+                headers: { 'Content-type': 'application/json', ...this._getAuthHeader() },
             })
 
             if (response.status === 204) {
