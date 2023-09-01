@@ -2,7 +2,7 @@ This is a React app written in JavaScript. It originated with `create-react-app`
 
 It's the ordering interface for [Reinstein QuizBowl](https://www.reinsteinquizbowl.com). It uses the [corresponding back end](https://github.com/jonahgreenthal/reinstein-order-backend).
 
-The production instance is running at `https://order.reinsteinquizbowl.com.``
+The production instance is running at `https://order.reinsteinquizbowl.com`.
 
 # Running
 Check `.env` or `.env.production` as appropriate to make sure you're connecting to the correct back end.
@@ -14,7 +14,7 @@ Run `yarn build` for production. The production instance is expected to run unde
 Run `yarn eslint` to run the linter.
 
 # Design
-It's supposed to match `https://www.reinsteinquizbowl.com``. The appearance, and especially the implementation thereof, could use some polish.
+It's supposed to match `https://www.reinsteinquizbowl.com`. The appearance, and especially the implementation thereof, could use some polish.
 
 # Security
 The app uses JWTs signed by the back end.
