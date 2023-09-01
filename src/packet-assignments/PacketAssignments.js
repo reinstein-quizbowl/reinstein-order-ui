@@ -95,7 +95,7 @@ class PacketAssignmentsImpl extends React.PureComponent {
 		if (exposure) {
 			return (
 				<TableCell key={key} align="center">
-					<Tooltip title={`${exposure.source} (order placed by ${schoolsById[exposure.ordererSchoolId].shortName})`}>
+					<Tooltip title={`${exposure.source} (${exposure.tentativePacketExposure ? 'tentative ' : ''}order placed by ${schoolsById[exposure.ordererSchoolId].shortName})`}>
 						<CheckCircle color="success" />
 					</Tooltip>
 				</TableCell>
