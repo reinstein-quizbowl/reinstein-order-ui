@@ -27,10 +27,16 @@ export default class Api {
                 console.error(`Error response when getting ${path}`, { response, json })
                 if (onError) {
                     onError(`Couldn't get from ${path}: ${response.status}`)
+                } else {
+                    throw new Error(`Couldn't get from ${path}: ${response.status}`)
                 }
             }
         } catch (e) {
-            onError(`Couldn't get from ${path}: ${e}`)
+            if (onError) {
+                onError(`Couldn't get from ${path}: ${e}`)
+            } else {
+                throw e
+            }
         }
     }
 
@@ -52,10 +58,16 @@ export default class Api {
                 console.error(`Error response when posting to ${path}`, { response, json, body })
                 if (onError) {
                     onError(`Couldn't post to ${path}: ${response.status}`)
+                } else {
+                    throw new Error(`Couldn't post to ${path}: ${response.status}`)
                 }
             }
         } catch (e) {
-            onError(`Couldn't post to ${path}: ${e}`)
+            if (onError) {
+                onError(`Couldn't post to ${path}: ${e}`)
+            } else {
+                throw e
+            }
         }
     }
 
@@ -75,10 +87,16 @@ export default class Api {
                 console.error(`Error response when deleting ${path}`, { response, json })
                 if (onError) {
                     onError(`Couldn't delete ${path}: ${response.status}`)
+                } else {
+                    throw new Error(`Couldn't delete ${path}: ${response.status}`)
                 }
             }
         } catch (e) {
-            onError(`Couldn't delete ${path}: ${e}`)
+            if (onError) {
+                onError(`Couldn't delete ${path}: ${e}`)
+            } else {
+                throw e
+            }
         }
     }
 }
