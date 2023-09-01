@@ -24,4 +24,4 @@ jobs:
       - name: Lint
         uses: borales/actions-yarn@v4
         with:
-          cmd: eslint # will run `yarn build` command
+          cmd: eslint src # will run `yarn build` command

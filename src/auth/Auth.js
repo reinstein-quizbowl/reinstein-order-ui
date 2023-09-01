@@ -1,6 +1,6 @@
 import dayJs from 'dayjs'
 
-import Api from '../api/Apix'
+import Api from '../api/Api'
 
 const LOCAL_STORAGE_KEY = 'user'
 
@@ -22,6 +22,8 @@ export default class Auth {
     // returns true for success, false for failure
     static logIn = async (username, password) => {
         const handleError = e => { throw new Error(e) }
+
+        const x = 5
 
         try {
             const response = await Api.post('/auth/login', { username, password }, handleError)
