@@ -4,23 +4,24 @@ import Api from '../api/Api'
 
 const LOCAL_STORAGE_KEY = 'user'
 
-export default class Auth {
-    static _removeFromStorage = () => localStorage.removeItem(LOCAL_STORAGE_KEY)
 
-    static _isExpired = (user) => {
-        const { tokenExpires: tokenExpiresStr } = user
-        if (!tokenExpiresStr) {
-            // This shouldn't happen, but if it does, we can't use the token, so it might as well be expired
-            return true
-        }
+const _removeFromStorage = () => localStorage.removeItem(LOCAL_STORAGE_KEY)
 
-        const tokenExpires = dayJs(tokenExpiresStr)
-        const now = dayJs()
-        return tokenExpires.isBefore(now)
+const _isExpired = (user) => {
+    const { tokenExpires: tokenExpiresStr } = user
+    if (!tokenExpiresStr) {
+        // This shouldn't happen, but if it does, we can't use the token, so it might as well be expired
+        return true
     }
 
+    const tokenExpires = dayJs(tokenExpiresStr)
+    const now = dayJs()
+    return tokenExpires.isBefore(now)
+}
+
+const Auth = {
     // returns true for success, false for failure
-    static logIn = async (username, password) => {
+    logIn: async (username, password) => {
         const handleError = e => { throw new Error(e) }
 
         try {
@@ -34,34 +35,36 @@ export default class Auth {
         } catch (e) {
             return false
         }
-    }
+    },
 
-    static logOut = () => this._removeFromStorage()
+    logOut: () => _removeFromStorage(),
 
-    static getUser = () => {
+    getUser: () => {
         const userRaw = localStorage.getItem(LOCAL_STORAGE_KEY)
         if (userRaw) {
             const user = JSON.parse(userRaw)
-            if (this._isExpired(user)) {
-                this._removeFromStorage()
+            if (_isExpired(user)) {
+                _removeFromStorage()
             } else {
                 return user
             }
         }
 
         return null
-    }
+    },
 
-    static isAuthenticated = () => !!this.getUser()
+    isAuthenticated: () => !!Auth.getUser(),
 
-    static getRoles = () => {
-        const user = this.getUser()
+    getRoles: () => {
+        const user = Auth.getUser()
         if (user) {
             return user.roles
         } else {
             return []
         }
-    }
+    },
 
-    static hasRole = role => this.getRoles().includes(role)
+    hasRole: role => Auth.getRoles().includes(role),
 }
+
+export default Auth

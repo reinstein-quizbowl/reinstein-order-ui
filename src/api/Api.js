@@ -2,21 +2,21 @@ import Auth from '../auth/Auth'
 
 const VALID_POST_RESPONSES = [200, 201, 202]
 
-export default class Api {
-    static _getAuthHeader = () => {
-        const user = Auth.getUser()
-        if (user) {
-            return { Authorization: `Bearer ${user.token}` }
-        } else {
-            return {}
-        }
+const _getAuthHeader = () => {
+    const user = Auth.getUser()
+    if (user) {
+        return { Authorization: `Bearer ${user.token}` }
+    } else {
+        return {}
     }
+}
 
-    static get = async (path, onError) => {
+const Api = {
+    get: async (path, onError) => {
         try {
             const response = await fetch(process.env.REACT_APP_API_BASE + path, {
                 method: 'GET',
-                headers: this._getAuthHeader(),
+                headers: _getAuthHeader(),
             })
 
             if (response.status === 200) {
@@ -38,15 +38,15 @@ export default class Api {
                 throw e
             }
         }
-    }
+    },
 
-    static post = async (path, body, onError) => {
+    post: async (path, body, onError) => {
         try {
             const response = await fetch(process.env.REACT_APP_API_BASE + path, {
                 method: 'POST',
                 mode: 'cors',
                 cache: 'no-cache',
-                headers: { 'Content-type': 'application/json', ...this._getAuthHeader() },
+                headers: { 'Content-type': 'application/json', ..._getAuthHeader() },
                 body: JSON.stringify(body),
             })
 
@@ -69,15 +69,15 @@ export default class Api {
                 throw e
             }
         }
-    }
+    },
 
-    static delete = async (path, onError) => {
+    delete: async (path, onError) => {
         try {
             const response = await fetch(process.env.REACT_APP_API_BASE + path, {
                 method: 'DELETE',
                 mode: 'cors',
                 cache: 'no-cache',
-                headers: { 'Content-type': 'application/json', ...this._getAuthHeader() },
+                headers: { 'Content-type': 'application/json', ..._getAuthHeader() },
             })
 
             if (response.status === 204) {
@@ -98,5 +98,7 @@ export default class Api {
                 throw e
             }
         }
-    }
+    },
 }
+
+export default Api
