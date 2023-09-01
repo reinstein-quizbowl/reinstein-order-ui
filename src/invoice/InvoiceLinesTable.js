@@ -8,7 +8,7 @@ import Loading from '../util-components/Loading'
 export default class InvoiceLinesTable extends React.PureComponent {
     renderLine = line => (
         <TableRow key={line.id || line.label}>{/* line.id is null for the synthetic items used in previewing */}
-            <TableCell component="th">
+            <TableCell variant="head" component="th">
                 {line.label}
                 {Number(line.quantity) > 1 && ` (${line.quantity} @ ${formatMoney(line.unitCost)} each)`}
             </TableCell>
@@ -47,7 +47,7 @@ export default class InvoiceLinesTable extends React.PureComponent {
                     </TableBody>
                     <TableFooter>
                         <TableRow>
-                            <TableCell component="th">Total</TableCell>
+                            <TableCell variant="head" component="th">Total</TableCell>
                             <TableCell align="right">{formatMoney(this.calculateTotal(lines), true)}</TableCell>
                         </TableRow>
                     </TableFooter>
