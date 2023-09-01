@@ -1,6 +1,6 @@
 import dayJs from 'dayjs'
 
-import Api from '../api/Api'
+import Api from '../api/Apix'
 
 const LOCAL_STORAGE_KEY = 'user'
 
