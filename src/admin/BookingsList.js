@@ -28,13 +28,7 @@ export default class BookingsList extends React.PureComponent {
 
     loadSchools = async () => {
         const schools = await Api.get('/schools')
-
-        const schoolsById = {}
-        for (const school of schools) {
-            schoolsById[school.id] = school
-        }
-
-        this.setState({ schoolsById })
+        this.setState({ schoolsById: groupById(schools) })
     }
 
     loadBookings = async () => {

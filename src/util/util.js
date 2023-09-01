@@ -34,3 +34,11 @@ export const formatMoney = (amount, alwaysShowDecimals = false) => {
         return '\u2212$' + formattedNumber
     }
 }
+
+export const groupById = (values) => {
+    const grouped = {}
+    for (const obj of values) {
+        grouped[obj.id] = obj
+    }
+    return grouped
+}

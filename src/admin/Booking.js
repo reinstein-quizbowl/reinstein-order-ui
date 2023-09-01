@@ -9,7 +9,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import Api from '../api/Api'
 import InvoiceLinesTable from '../invoice/InvoiceLinesTable'
 import { ALL_STATUSES } from '../util/bookingUtil'
-import { SENTINEL_NULL_DATE, formatMoney, setStatePromise } from '../util/util'
+import { SENTINEL_NULL_DATE, formatMoney, groupById, setStatePromise } from '../util/util'
 import Loading from '../util-components/Loading'
 import LoadingOverlay from '../util-components/LoadingOverlay'
 
@@ -58,13 +58,7 @@ class BookingImpl extends React.PureComponent {
 
     loadSchools = async () => {
         const schools = await Api.get('/schools')
-
-        const schoolsById = {}
-        for (const school of schools) {
-            schoolsById[school.id] = school
-        }
-
-        this.setState({ schoolsById })
+        this.setState({ schoolsById: groupById(schools) })
     }
 
     handleTextFieldChange = e => this.setState({ [e.target.name]: e.target.value })

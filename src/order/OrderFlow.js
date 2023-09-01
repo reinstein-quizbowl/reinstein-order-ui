@@ -12,7 +12,7 @@ import Step4CheckPacketAvailability from './Step4CheckPacketAvailability'
 import Step5PracticeQuestions from './Step5PracticeQuestions'
 import Step6Confirm from './Step6Confirm'
 import Api from '../api/Api'
-import { setStatePromise } from '../util/util'
+import { groupById, setStatePromise } from '../util/util'
 import Loading from '../util-components/Loading'
 import Mailto from '../util-components/Mailto'
 
@@ -73,13 +73,8 @@ class OrderFlowImpl extends React.PureComponent {
 
         if (this.state.schoolsById) return
 
-        const schools = await Api.get('/schools/active', onError)
-        const schoolsById = {}
-        for (const school of schools) {
-            schoolsById[school.id] = school
-        }
-
-        await setStatePromise(this, { schoolsById })
+        const schools = await Api.get('/schools', onError)
+        await setStatePromise(this, { schoolsById: groupById(schools) })
     }
 
     loadPackets = async () => {
