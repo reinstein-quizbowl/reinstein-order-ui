@@ -114,7 +114,7 @@ export default class Step1Basics extends AbstractStep {
                             id="school"
                             aria-labelledby="schoolLabel"
                             value={schoolId ? schoolsById[schoolId] : null}
-                            schools={Object.values(schoolsById)}
+                            schools={Object.values(schoolsById).filter(it => it.active)}
                             onChange={this.handleSchoolChange}
                             placeholder="Choose school&hellip;"
                             helperText={<>If your school is not listed, please write to <Mailto />.</>}

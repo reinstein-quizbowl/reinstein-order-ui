@@ -172,7 +172,7 @@ export default class Step3NonConferenceGames extends AbstractStep {
                         </p>
                         <NonConferenceGameInput
                             open={adding}
-                            schools={Object.values(schoolsById)}
+                            schools={Object.values(schoolsById).filter(it => it.active)}
                             year={year}
                             baseSchool={data.school}
                             onClose={this.closeAddingGame}
