@@ -23,8 +23,6 @@ export default class Auth {
     static logIn = async (username, password) => {
         const handleError = e => { throw new Error(e) }
 
-        const x = 5
-
         try {
             const response = await Api.post('/auth/login', { username, password }, handleError)
             if (response.token) {

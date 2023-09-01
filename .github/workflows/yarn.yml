@@ -16,12 +16,12 @@ jobs:
       - name: Run install
         uses: borales/actions-yarn@v4
         with:
-          cmd: install # will run `yarn install` command
+          cmd: install
       - name: Build production bundle
         uses: borales/actions-yarn@v4
         with:
-          cmd: build # will run `yarn build` command
-      - name: Lint
+          cmd: build
+      - name: Lint # This might actually be unnecessary because eslint might run as part of the build process, but to be explicit...
         uses: borales/actions-yarn@v4
         with:
-          cmd: eslint src # will run `yarn build` command
+          cmd: eslint src
