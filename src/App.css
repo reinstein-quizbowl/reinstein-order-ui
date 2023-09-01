@@ -46,8 +46,8 @@
 	text-decoration: dotted underline;
 }
 
-details p {
-	margin-bottom: 0;
+.MuiFormLabel-asterisk {
+	display: none;
 }
 
 .booking-step-header {
