@@ -36,10 +36,20 @@ class DoubleBookingsImpl extends React.PureComponent {
     }
 
     componentDidMount() {
-        this.loadPackets()
-        this.loadSchools()
         this.loadExposures()
     }
+
+	loadExposures = async () => {
+		const { onError } = this.props
+
+		const exposures = await Api.get('/packetExposures/doubleBookings', onError)
+		this.setState({ exposures: exposures.sort(comparator) })
+
+        if (exposures.length > 0) {
+            this.loadPackets()
+            this.loadSchools()
+        } // otherwise, we don't need them
+	}
 
     loadPackets = async () => {
         const { onError } = this.props
@@ -54,13 +64,6 @@ class DoubleBookingsImpl extends React.PureComponent {
         const schools = await Api.get('/schools', onError)
         this.setState({ schoolsById: groupById(schools) })
     }
-
-	loadExposures = async () => {
-		const { onError } = this.props
-
-		const exposures = await Api.get('/packetExposures/doubleBookings', onError)
-		this.setState({ exposures: exposures.sort(comparator) })
-	}
 
     renderExposure = (exposure) => {
         const { packetsById, schoolsById } = this.state
