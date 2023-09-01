@@ -10,6 +10,7 @@ import { ALL_STATUSES, STATUS_SUBMITTED, STATUS_APPROVED, getStatusData } from '
 import { groupById, setStatePromise } from '../util/util'
 import LoadingOverlay from '../util-components/LoadingOverlay'
 import BookingSummaryRow from './BookingSummaryRow'
+import DoubleBookings from './DoubleBookings'
 
 const HEADERS = [
     { code: 'date', label: 'Date' },
@@ -224,6 +225,7 @@ class BookingsListImpl extends React.PureComponent {
             <div>
                 {(!schoolsById || !bookings) && <LoadingOverlay />}
                 {this.renderStatusPicker()}
+                <DoubleBookings />
                 {this.renderBookings()}
                 <Button onClick={this.handleLogOut}>
                     Log Out
