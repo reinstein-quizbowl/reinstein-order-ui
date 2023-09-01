@@ -85,10 +85,11 @@ input.input {
 	color: black; /* slightly blacker than body text */
 }
 
-/* .input-label { CHECK: can this be removed?
-	color: black;
-	background-color: white;
-} */
+.date-field input {
+	min-height: 2.5rem;
+	border: 0;
+	background-color: inherit;
+}
 
 label {
 	margin-bottom: 0.25rem;
@@ -209,4 +210,26 @@ p + address {
 
 .MuiTooltip-tooltip ul, .MuiTooltip-tooltip ol {
 	margin-left: 0.5rem;
+}
+
+.booking-data > div {
+	display: block;
+	margin-bottom: 0.5rem;
+}
+
+.booking-data dt, .booking-data dd {
+	display: inline-block;
+}
+
+dt {
+	font-weight: 600;
+}
+
+dd ul, dd ol {
+	margin-left: 0;
+}
+
+.booking-data dd {
+	margin-left: 0.5rem;
+	margin-bottom: 0;
 }

@@ -18,8 +18,10 @@ export const theme = createTheme({
     },
     components: {
         MuiFormLabel: {
-            defaultProps: {
-
+            styleOverrides: {
+                root: {
+                    fontWeight: '600',
+                },
             },
         },
     },
