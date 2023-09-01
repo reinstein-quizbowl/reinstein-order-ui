@@ -1,70 +1,25 @@
-# Getting Started with Create React App
+This is a React app written in JavaScript. It originated with `create-react-app`.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+It's the ordering interface for [Reinstein QuizBowl](https://www.reinsteinquizbowl.com). It uses the [corresponding back end](https://github.com/jonahgreenthal/reinstein-order-backend).
 
-## Available Scripts
+The production instance is running at `https://order.reinsteinquizbowl.com.``
 
-In the project directory, you can run:
+# Running
+Check `.env` or `.env.production` as appropriate to make sure you're connecting to the correct back end.
 
-### `npm start`
+Run `yarn start` for development. It runs at `http://localhost:3000` and hot-reloads (though not particularly well).
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Run `yarn build` for production. The production instance is expected to run under Apache using `public/.htaccess`.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Run `yarn eslint` to run the linter.
 
-### `npm test`
+# Design
+It's supposed to match `https://www.reinsteinquizbowl.com``. The appearance, and especially the implementation thereof, could use some polish.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+# Security
+The app uses JWTs signed by the back end.
 
-### `npm run build`
+For now, there is only one role (`admin`). Every user gets it. We don't currently anticipate a need for distinguishing roles, but that can easily be added later if necessary.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+The auth setup was largely accomplished by following [this tutorial](https://www.bezkoder.com/spring-boot-react-jwt-auth/) (with some adaptations).
+ 
