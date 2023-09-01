@@ -112,7 +112,7 @@ class PacketAssignmentsImpl extends React.PureComponent {
 
 		const yearName = year.name.replace('-', '–')
 
-		if (exposuresByExposedSchoolId.length === 0) {
+		if (Object.keys(exposuresByExposedSchoolId).length === 0) {
 			return <p>No schools are signed up to hear our questions in the {yearName} regular season so far.</p>
 		}
 
