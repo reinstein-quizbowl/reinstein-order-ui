@@ -51,6 +51,11 @@ export default class BookingsList extends React.PureComponent {
         }
     })
 
+    handleLogout = () => {
+        Auth.logout()
+        this.props.navigate('/')
+    }
+
     renderStatusPicker = () => (
         <FormGroup row>
             {ALL_STATUSES.map(this.renderStatusOption)}
@@ -106,6 +111,9 @@ export default class BookingsList extends React.PureComponent {
                 {(!schoolsById || !bookings) && <LoadingOverlay />}
                 {this.renderStatusPicker()}
                 {this.renderBookings()}
+                <Button onClick={this.handleLogout}>
+                    Log Out
+                </Button>
             </div>
         )
     }
