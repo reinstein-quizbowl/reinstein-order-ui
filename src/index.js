@@ -59,6 +59,11 @@ const router = createBrowserRouter([
 		ErrorBoundary: RouterErrorBoundary,
 	},
 	{
+		path: '/admin/order',
+		element: <Protected><BookingsList /></Protected>,
+		ErrorBoundary: RouterErrorBoundary,
+	},
+	{
 		path: '/admin/orders',
 		element: <Protected><BookingsList /></Protected>,
 		ErrorBoundary: RouterErrorBoundary,
@@ -69,10 +74,14 @@ const router = createBrowserRouter([
 		ErrorBoundary: RouterErrorBoundary,
 	},
 	{
+		path: '/admin/orders/:creationId',
+		element: <Protected><Booking /></Protected>,
+		ErrorBoundary: RouterErrorBoundary,
+	},
+	{
 		path: '*',
 		element: <NotFound />,
 	}
-	// TODO /admin/order/:creationId
 ])
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
