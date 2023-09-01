@@ -90,8 +90,10 @@ const renderNotes = (internal, external) => {
 const BookingSummaryRow = ({ booking, schoolsById }) => {
     const navigate = useNavigate()
 
+    const bookingPageUrl = `/admin/order/${booking.creationId}`
+
     return (
-        <TableRow className="booking-summary-row" hover onClick={() => navigate(`/admin/order/${booking.creationId}`)}>
+        <TableRow className="booking-summary-row" hover onClick={() => navigate(bookingPageUrl)} onAuxClick={() => window.open(bookingPageUrl)}>
             <TableCell variant="head">
                 {dayjs(booking.createdAt).format('M/D/YY')}
             </TableCell>

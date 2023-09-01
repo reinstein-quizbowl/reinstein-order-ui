@@ -1,14 +1,35 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
+import dayjs from 'dayjs'
 
-import { Button, Checkbox, FormControlLabel, FormGroup, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material'
+import { Button, Checkbox, FormControlLabel, FormGroup, Table, TableBody, TableCell, TableHead, TableRow, TableSortLabel } from '@mui/material'
 
 import Api from '../api/Api'
-import BookingSummaryRow from './BookingSummaryRow'
-import { ALL_STATUSES, STATUS_SUBMITTED, STATUS_APPROVED } from '../util/bookingUtil'
-import { setStatePromise } from '../util/util'
+import Auth from '../auth/Auth'
+import { ALL_STATUSES, STATUS_SUBMITTED, STATUS_APPROVED, getStatusData } from '../util/bookingUtil'
+import { groupById, setStatePromise } from '../util/util'
 import LoadingOverlay from '../util-components/LoadingOverlay'
+import BookingSummaryRow from './BookingSummaryRow'
 
-export default class BookingsList extends React.PureComponent {
+const HEADERS = [
+    { code: 'date', label: 'Date' },
+    { code: 'school', label: 'School' },
+    { code: 'orderer', label: 'Orderer' },
+    { code: 'conference', label: 'Conference' },
+    { code: 'nonConferenceGames', label: 'Add’l Games' },
+    { code: 'practice', label: 'Practice' },
+    { code: 'note', label: 'Note' },
+    { code: 'cost', label: 'Total Cost', align: 'right' },
+    { code: 'status', label: 'Status' },
+]
+
+const BookingsList = (props) => {
+    const navigate = useNavigate()
+
+    return <BookingsListImpl navigate={navigate}{...props} />
+}
+
+class BookingsListImpl extends React.PureComponent {
     constructor(props) {
         super(props)
 
@@ -16,6 +37,8 @@ export default class BookingsList extends React.PureComponent {
             statusCodes: [STATUS_SUBMITTED.code, STATUS_APPROVED.code],
             bookings: null,
             schoolsById: null,
+            sortBy: null,
+            sortDirection: 'asc',
         }
     }
 
@@ -56,6 +79,89 @@ export default class BookingsList extends React.PureComponent {
         this.props.navigate('/')
     }
 
+    determineBaseComparator = () => {
+        const { sortBy } = this.state
+
+        switch (sortBy) {
+            case null:
+            case 'date':
+                return (a, b) => dayjs(a.createdAt).valueOf() - dayjs(b.createdAt).valueOf()
+            case 'school':
+                return (a, b) => a.school.shortName.localeCompare(b.school.shortName)
+            case 'orderer':
+                return (a, b) => a.name.localeCompare(b.name)
+            case 'conference':
+                return (a, b) => {
+                    if (a.conference && b.conference) {
+                        return a.conference.name.localeCompare(b.conference.name)
+                    } else if (a.conference) {
+                        return 1
+                    } else if (b.conference) {
+                        return -1
+                    } else {
+                        return 0
+                    }
+                }
+            case 'nonConferenceGames':
+                return (a, b) => a.nonConferenceGames.length - b.nonConferenceGames.length
+            case 'practice':
+                return (a, b) => (a.stateSeriesOrders.length + a.packetOrders.length + a.compilationOrders.length) - (b.stateSeriesOrders.length + b.packetOrders.length + b.compilationOrders.length)
+            case 'note':
+                return (a, b) => {
+                    const aNoteCount = (!!a.internalNote ? 1 : 0) + (!!a.externalNote ? 1 : 0)
+                    const bNoteCount = (!!b.internalNote ? 1 : 0) + (!!b.externalNote ? 1 : 0)
+                    return aNoteCount - bNoteCount
+                }
+            case 'cost':
+                return (a, b) => Number(a.cost) - Number(b.cost)
+            case 'status':
+                return (a, b) => {
+                    const aStatus = getStatusData(a.statusCode)
+                    const bStatus = getStatusData(b.statusCode)
+
+                    if (aStatus && bStatus) {
+                        return aStatus.sequence - bStatus.sequence
+                    } else {
+                        // this shouldn't happen
+                        return 0
+                    }
+                }
+            default: 
+                console.warn('unknown sort by: ' + sortBy)
+                return (a, b) => 0
+        }
+    }
+
+    determineComparator = () => {
+        const { sortDirection } = this.state
+
+        const baseComparator = this.determineBaseComparator()
+
+        if (sortDirection === 'desc') {
+            return (a, b) => baseComparator(b, a)
+        } else {
+            return baseComparator
+        }
+    }
+
+    handleSort = newSortBy => this.setState((prevState) => {
+        const oldSortBy = prevState.sortBy
+        const oldSortDirection = prevState.sortDirection
+
+        if (newSortBy === oldSortBy) {
+            if (oldSortDirection === 'desc') {
+                return { sortDirection: 'asc' }
+            } else {
+                return { sortDirection: 'desc' }
+            }
+        } else {
+            return {
+                sortBy: newSortBy,
+                sortDirection: 'asc',
+            }
+        }
+    })
+
     renderStatusPicker = () => (
         <FormGroup row>
             {ALL_STATUSES.map(this.renderStatusOption)}
@@ -76,8 +182,10 @@ export default class BookingsList extends React.PureComponent {
         />
     )
 
+    renderBookingRow = booking => <BookingSummaryRow key={booking.id} booking={booking} schoolsById={this.state.schoolsById} />
+
     renderBookings = () => {
-        const { bookings, schoolsById, statusCodes } = this.state
+        const { bookings, statusCodes, sortBy, sortDirection } = this.state
         if (!bookings) return null
         if (bookings.length === 0) return <p>No results for {statusCodes.length === 1 ? 'this status' : 'these statuses' }.</p>
 
@@ -85,19 +193,25 @@ export default class BookingsList extends React.PureComponent {
             <Table className="invoice">
                 <TableHead>
                     <TableRow>
-                        <TableCell>Date</TableCell>
-                        <TableCell>School</TableCell>
-                        <TableCell>Orderer</TableCell>
-                        <TableCell>Conference</TableCell>
-                        <TableCell>Add'l Games</TableCell>
-                        <TableCell>Practice</TableCell>
-                        <TableCell>Note</TableCell>
-                        <TableCell align="right">Total Cost</TableCell>
-                        <TableCell>Status</TableCell>
+                        {HEADERS.map(header => (
+                            <TableCell
+                                key={header.code}
+                                align={header.align}
+                                sortDirection={sortDirection}
+                            >
+                                <TableSortLabel
+                                    active={sortBy === header.code}
+                                    direction={sortDirection}
+                                    onClick={() => this.handleSort(header.code)}
+                                >
+                                    {header.label}
+                                </TableSortLabel>
+                            </TableCell>
+                        ))}
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {bookings.map(it => <BookingSummaryRow key={it.id} booking={it} schoolsById={schoolsById} />)}
+                    {bookings.sort(this.determineComparator()).map(this.renderBookingRow)}
                 </TableBody>
             </Table>
         )
@@ -118,3 +232,5 @@ export default class BookingsList extends React.PureComponent {
         )
     }
 }
+
+export default BookingsList
