@@ -36,7 +36,7 @@ const Login = () => {
             return
         }
 
-        const success = await Auth.login(username, password)
+        const success = await Auth.logIn(username, password)
         setBusy(false)
         if (success) {
             const destination = location && location.state && location.state.from && location.state.from.pathname ? location.state.from.pathname : '/admin'

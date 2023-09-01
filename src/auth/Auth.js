@@ -20,7 +20,7 @@ export default class Auth {
     }
 
     // returns true for success, false for failure
-    static login = async (username, password) => {
+    static logIn = async (username, password) => {
         const handleError = e => { throw new Error(e) }
 
         try {
@@ -36,7 +36,7 @@ export default class Auth {
         }
     }
 
-    static logout = () => this._removeFromStorage()
+    static logOut = () => this._removeFromStorage()
 
     static getUser = () => {
         const userRaw = localStorage.getItem(LOCAL_STORAGE_KEY)
