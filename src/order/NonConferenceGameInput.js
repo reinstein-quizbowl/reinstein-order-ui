@@ -56,6 +56,15 @@ export default class NonConferenceGameInput extends React.PureComponent {
 
     handleClose = () => this.setState(initialState(this.props), this.props.onClose)
 
+    renderOwnTeamWarningIfAppropriate = () => {
+        const { baseSchool } = this.props
+        const { school1Id, school2Id, school3Id } = this.state
+
+        if (![school1Id, school2Id, school3Id].includes(baseSchool.id)) {
+            return <p class="form-warning">You have indicated that your own team won&rsquo;t be hearing the questions for this game. Make sure that&rsquo;s actually true; it&rsquo;s critical for question security!</p>
+        }
+    }
+
     render() {
         const { open, schools, baseSchool } = this.props
         const { school1Id, school2Id, school3Id, showError } = this.state
@@ -107,7 +116,7 @@ export default class NonConferenceGameInput extends React.PureComponent {
                         <div className="input-widget-container">
                             <FormControl fullWidth>
                                 <FormLabel id="school3IdLabel" htmlFor="school3Id" required>
-                                    Will another school be present for this game? If so, which?
+                                    Will another school hear the questions for this game (e.g., by being in the room)? If so, which?
                                 </FormLabel>
                                 <SchoolPicker
                                     id="school3Id"
@@ -120,6 +129,8 @@ export default class NonConferenceGameInput extends React.PureComponent {
                                 />
                             </FormControl>
                         </div>
+
+                        {this.renderOwnTeamWarningIfAppropriate()}
 
                         {showError && <p className="form-error">{error}</p>}
                     </DialogContent>

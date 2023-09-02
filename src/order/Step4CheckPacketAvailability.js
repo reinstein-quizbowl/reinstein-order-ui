@@ -117,7 +117,8 @@ export default class Step4CheckPacketAvailability extends AbstractStep {
                     <ul>
                         {potentialAssignments.filter(it => it.isMissingPacketAssignment).map(this.renderFailedAssignment)}
                     </ul>
-                    <p>You may want to <Link to="/packetAssignments" target="_blank">review the list of packets already assigned</Link> and see if you can think of a way to make it work even though our software (which isn&rsquo;t perfect!) couldn&rsquo;t. If so, please write to us at <Mailto />.</p>
+                    <p>You may want to go back to earlier steps in the process (by clicking the name of a section) to edit your order to see if we can accommodate a smaller order.</p>
+                    <p>You can also <Link to="/packetAssignments" target="_blank">review the list of packets already assigned</Link> and see if you can think of a way to make it work even though our software (which isn&rsquo;t perfect!) couldn&rsquo;t. If so, please write to us at <Mailto />.</p>
                     <p>You can also adjust your order and try again, or write to <Mailto /> for help.</p>
                 </div>
             )
