@@ -61,7 +61,7 @@ export default class NonConferenceGameInput extends React.PureComponent {
         const { school1Id, school2Id, school3Id } = this.state
 
         if (![school1Id, school2Id, school3Id].includes(baseSchool.id)) {
-            return <p class="form-warning">You have indicated that your own team won&rsquo;t be hearing the questions for this game. Make sure that&rsquo;s actually true; it&rsquo;s critical for question security!</p>
+            return <p className="form-warning">You have indicated that your own team won&rsquo;t be hearing the questions for this game. Make sure that&rsquo;s actually true; it&rsquo;s critical for question security!</p>
         }
     }
 

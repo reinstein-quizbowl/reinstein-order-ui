@@ -141,7 +141,7 @@ class BookingImpl extends React.PureComponent {
                 <dl>
                     {nonConferenceGames.map(game => (
                         <div key={game.id}>
-                            <dt>{game.assignedPacket ? `${game.assignedPacket.yearCode} packet ${game.assignedPacket.number}` : <span class="form-error">Packet TBD</span>}</dt>
+                            <dt>{game.assignedPacket ? `${game.assignedPacket.yearCode} packet ${game.assignedPacket.number}` : <span className="form-error">Packet TBD</span>}</dt>
                             <dd>
                                 <ul>
                                     {game.schoolIds.map(id => <li key={id}>{schoolsById[id].shortName}</li>)}
