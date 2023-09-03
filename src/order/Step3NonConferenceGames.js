@@ -79,6 +79,7 @@ export default class Step3NonConferenceGames extends AbstractStep {
             if (newGames.length > 0) {
                 const reloadedData = await Api.post(`/bookings/${data.creationId}/nonConferenceGames`, newGames, onError)
                 await dataReloader(reloadedData)
+                this.setState({ nonConferenceGames: reloadedData.nonConferenceGames }) // so that now we have the IDs in state
             }
         } else {
             const gamesToDelete = nonConferenceGames.filter(it => !!it.id)
