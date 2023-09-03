@@ -196,7 +196,14 @@ p + address {
 	height: 100%;
 }
 
-.status-filter-option {
+fieldset {
+	border: 1px solid gray;
+	border-radius: 0.2rem;
+	padding: 1rem;
+	margin-bottom: 2rem;
+}
+
+.filter-option {
 	padding-right: 1rem;
 }
 

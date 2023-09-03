@@ -103,7 +103,7 @@ const BookingSummaryRow = ({ booking, schoolsById }) => {
                 </Tooltip>
             </TableCell>
             <TableCell>
-                <Tooltip title={booking.authority}>
+                <Tooltip title={`${booking.emailAddress} (${booking.authority})`}>
                     <span>{booking.name}</span>
                 </Tooltip>
             </TableCell>

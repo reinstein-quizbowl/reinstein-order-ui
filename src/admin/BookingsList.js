@@ -2,7 +2,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 
-import { Button, Checkbox, FormControlLabel, FormGroup, Table, TableBody, TableCell, TableHead, TableRow, TableSortLabel } from '@mui/material'
+import { Button, Checkbox, FormControl, FormControlLabel, FormLabel, FormGroup, Table, TableBody, TableCell, TableHead, TableRow, TableSortLabel, TextField } from '@mui/material'
 
 import Api from '../api/Api'
 import Auth from '../auth/Auth'
@@ -36,6 +36,8 @@ class BookingsListImpl extends React.PureComponent {
 
         this.state = {
             statusCodes: [STATUS_SUBMITTED.code, STATUS_APPROVED.code],
+            includePaid: true,
+            includeUnpaid: true,
             bookings: null,
             schoolsById: null,
             sortBy: null,
@@ -56,15 +58,25 @@ class BookingsListImpl extends React.PureComponent {
     }
 
     loadBookings = async () => {
-        const { statusCodes } = this.state
+        const { statusCodes, includePaid, includeUnpaid } = this.state
 
         const statusCodesParam = statusCodes.map(it => 'statusCode=' + it).join('&')
 
         await setStatePromise(this, { bookings: null })
 
-        const bookings = await Api.get('/bookings?' + statusCodesParam)
+        let bookings = await Api.get('/bookings?' + statusCodesParam)
+
+        if (!includePaid) {
+            bookings = bookings.filter(it => !it.paymentReceivedDate)
+        }
+        if (!includeUnpaid) {
+            bookings = bookings.filter(it => !!it.paymentReceivedDate)
+        }
+
         this.setState({ bookings })
     }
+
+    toggleStateMember = key => this.setState(prevState => ({ [key]: !prevState[key] }))
 
     toggleStatus = statusCode => this.setState((prevState) => {
         const old = prevState.statusCodes
@@ -164,14 +176,28 @@ class BookingsListImpl extends React.PureComponent {
     })
 
     renderStatusPicker = () => (
-        <FormGroup row>
-            {ALL_STATUSES.map(this.renderStatusOption)}
+        <fieldset>
+            <FormGroup row>
+                {ALL_STATUSES.map(this.renderStatusOption)}
+            </FormGroup>
+            <FormGroup row>
+                <FormControlLabel
+                    label="Include paid orders"
+                    control={<Checkbox checked={this.state.includePaid} onChange={() => this.toggleStateMember('includePaid')} />}
+                    classes={{ root: 'filter-option' }}
+                />
+                <FormControlLabel
+                    label="Include unpaid orders"
+                    control={<Checkbox checked={this.state.includeUnpaid} onChange={() => this.toggleStateMember('includeUnpaid')} />}
+                    classes={{ root: 'filter-option' }}
+                />
+            </FormGroup>
             <div>{/* prevents the <Button> from growing weirdly tall */}
                 <Button onClick={this.loadBookings} variant="outlined">
                     Update Listing
                 </Button>
             </div>
-        </FormGroup>
+        </fieldset>
     )
 
     renderStatusOption = status => (
@@ -179,7 +205,7 @@ class BookingsListImpl extends React.PureComponent {
             key={status.code}
             label={status.label}
             control={<Checkbox checked={this.state.statusCodes.includes(status.code)} onChange={() => this.toggleStatus(status.code)} />}
-            classes={{ root: 'status-filter-option' }}
+            classes={{ root: 'filter-option' }}
         />
     )
 
@@ -218,6 +244,27 @@ class BookingsListImpl extends React.PureComponent {
         )
     }
 
+    renderEmailAddresses = () => {
+        const { bookings } = this.state
+        if (!bookings) return null
+
+        return (
+            <FormControl fullWidth>
+                <FormLabel id="emailsLabel" htmlFor="emails" required>
+                    Email addresses for orders listed above
+                </FormLabel>
+                <TextField
+                    aria-labelledby="emailsLabel"
+                    id="emails"
+                    name="emails"
+                    value={bookings.map(it => it.emailAddress).join('; ')}
+                    inputProps={{ className: 'input' }}
+                    fullWidth
+                />
+            </FormControl>
+        )
+    }
+
     render() {
         const { schoolsById, bookings } = this.state
 
@@ -227,6 +274,7 @@ class BookingsListImpl extends React.PureComponent {
                 {this.renderStatusPicker()}
                 <DoubleBookings />
                 {this.renderBookings()}
+                {this.renderEmailAddresses()}
                 <Button onClick={this.handleLogOut}>
                     Log Out
                 </Button>
