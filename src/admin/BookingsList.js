@@ -246,7 +246,7 @@ class BookingsListImpl extends React.PureComponent {
 
     renderEmailAddresses = () => {
         const { bookings } = this.state
-        if (!bookings) return null
+        if (!bookings || bookings.length === 0) return null
 
         return (
             <FormControl fullWidth>
