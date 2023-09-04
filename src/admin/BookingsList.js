@@ -30,6 +30,8 @@ const BookingsList = (props) => {
     return <BookingsListImpl navigate={navigate}{...props} />
 }
 
+BookingsList.propTypes = {}
+
 class BookingsListImpl extends React.PureComponent {
     constructor(props) {
         super(props)

@@ -23,7 +23,7 @@ const OrderFlow = (props) => {
     return <OrderFlowImpl creationId={params.creationId} onError={handleError} {...props} />
 }
 
-export default OrderFlow
+OrderFlow.propTypes = {}
 
 class OrderFlowImpl extends React.PureComponent {
     constructor(props) {
@@ -234,3 +234,5 @@ class OrderFlowImpl extends React.PureComponent {
         )
     }
 }
+
+export default OrderFlow

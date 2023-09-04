@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import { Autocomplete, Box, TextField } from '@mui/material'
 
@@ -100,6 +101,24 @@ const SchoolPicker = props => {
             )}
         />
     )
+}
+
+SchoolPicker.propTypes = {
+    id: PropTypes.string.isRequired,
+    value: PropTypes.oneOfType([
+        PropTypes.number, // ID of a school
+        PropTypes.object, // ApiSchool
+    ]),
+    'aria-labelledby': PropTypes.string, // ID of the label element
+    schools: PropTypes.array.isRequired, // Array<ApiSchool> to serve as choices
+    label: PropTypes.node,
+    placeholder: PropTypes.node,
+    helperText: PropTypes.node, // only used if showAddSchoolHelperText is false
+    showAddSchoolHelperText: PropTypes.bool,
+    showDistanceFrom: PropTypes.object, // ApiSchool; if present, each choice's distance from this school will be shown, with styling if far away
+    autoFocus: PropTypes.bool,
+    onChange: PropTypes.func.isRequired,
+    // other props spread to <TextField>
 }
 
 export default SchoolPicker

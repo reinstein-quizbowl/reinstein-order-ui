@@ -151,10 +151,12 @@ export default class Step6Confirm extends AbstractStep {
 
                 {/* We don't show the practice material separately because there isn't anything interesting to say about it beyond what's shown on the invoice */}
 
-                <section className="order-review invoice-wrapper">
-                    <h2>Invoice Preview</h2>
-                    <InvoiceLinesTable lines={invoiceLines} />
-                </section>
+                {invoiceLines && (
+                    <section className="order-review invoice-wrapper">
+                        <h2>Invoice Preview</h2>
+                        <InvoiceLinesTable lines={invoiceLines} />
+                    </section>
+                )}
 
                 <form onSubmit={this.handleSubmit}>
                     <div className="input-widget-container">

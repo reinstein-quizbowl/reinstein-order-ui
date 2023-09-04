@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 
@@ -127,6 +128,11 @@ const BookingSummaryRow = ({ booking, schoolsById }) => {
             </TableCell>
         </TableRow>
     )
+}
+
+BookingSummaryRow.propTypes = {
+    booking: PropTypes.object.isRequired, // ApiBooking
+    schoolsById: PropTypes.object.isRequired, // Map<Long, ApiSchool>
 }
 
 export default BookingSummaryRow

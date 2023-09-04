@@ -204,6 +204,7 @@ export default class Step2Conference extends AbstractStep {
                         </ul>
                         <div className="input-widget-container">
                             <SchoolPicker
+                                id="addSchoolToConference"
                                 value={null}
                                 schools={Object.values(schoolsById).filter(it => it.active)}
                                 onChange={this.handleAddSchool}

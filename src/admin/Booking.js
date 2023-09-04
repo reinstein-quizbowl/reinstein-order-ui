@@ -20,6 +20,8 @@ const Booking = (props) => {
     return <BookingImpl creationId={params.creationId} onError={handleError} {...props} />
 }
 
+Booking.propTypes = {}
+
 class BookingImpl extends React.PureComponent {
     constructor(props) {
         super(props)

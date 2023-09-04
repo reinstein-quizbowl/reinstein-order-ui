@@ -10,4 +10,6 @@ const LoadingOverlay = () => (
     </div>
 )
 
+LoadingOverlay.propTypes = {}
+
 export default LoadingOverlay

@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormLabel } from '@mui/material'
 
@@ -12,6 +13,15 @@ const initialState = (props) => ({
 })
 
 export default class NonConferenceGameInput extends React.PureComponent {
+    static propTypes = {
+        open: PropTypes.bool.isRequired,
+        schools: PropTypes.array.isRequired, // Array<ApiSchool> to act as choices
+        year: PropTypes.object.isRequired, // ApiYear
+        baseSchool: PropTypes.object.isRequired, // ApiSchool to act as distance from which `schools`' distance is measured and to act as a default selection
+        onClose: PropTypes.func.isRequired,
+        onSubmit: PropTypes.func.isRequired,
+    }
+
     constructor(props) {
         super(props)
         

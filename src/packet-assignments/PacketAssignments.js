@@ -17,7 +17,7 @@ const PacketAssignments = (props) => {
     return <PacketAssignmentsImpl onError={handleError} {...props} />
 }
 
-export default PacketAssignments
+PacketAssignments.propTypes = {}
 
 class PacketAssignmentsImpl extends React.PureComponent {
 	constructor(props) {
@@ -151,3 +151,5 @@ class PacketAssignmentsImpl extends React.PureComponent {
 		)
 	}
 }
+
+export default PacketAssignments

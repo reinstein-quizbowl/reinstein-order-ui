@@ -15,4 +15,6 @@ const Protected = ({ children, requiredRole }) => {
     }
 }
 
+Protected.propTypes = {}
+
 export default Protected

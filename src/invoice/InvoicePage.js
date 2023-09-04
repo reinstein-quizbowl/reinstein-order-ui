@@ -20,6 +20,8 @@ const InvoicePage = (props) => {
     return <InvoicePageImpl creationId={params.creationId} onError={handleError} {...props} />
 }
 
+InvoicePage.propTypes = {}
+
 class InvoicePageImpl extends React.PureComponent {
     constructor(props) {
         super(props)

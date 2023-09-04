@@ -22,7 +22,7 @@ const DoubleBookings = (props) => {
     return <DoubleBookingsImpl onError={handleError} {...props} />
 }
 
-export default DoubleBookings
+DoubleBookings.propTypes = {}
 
 class DoubleBookingsImpl extends React.PureComponent {
     constructor(props) {
@@ -96,3 +96,5 @@ class DoubleBookingsImpl extends React.PureComponent {
         )
     }
 }
+
+export default DoubleBookings

@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import { Accordion, AccordionDetails, AccordionSummary, Typography } from '@mui/material'
 import { CheckCircle, RadioButtonChecked, RadioButtonUnchecked } from '@mui/icons-material'
@@ -7,6 +8,19 @@ import LoadingOverlay from '../util-components/LoadingOverlay'
 import { setStatePromise } from '../util/util'
 
 export default class AbstractStep extends React.PureComponent {
+    static propTypes = {
+        currentStep: PropTypes.number.isRequired,
+        highestSeenStep: PropTypes.number.isRequired,
+        onGoToStep: PropTypes.func.isRequired,
+        onToggleExpansion: PropTypes.func, // omit to prevent toggling
+        year: PropTypes.object.isRequired, // ApiYear
+        schoolsById: PropTypes.object.isRequired, // Map<Long, ApiSchool>
+        packets: PropTypes.array.isRequired, // Array<ApiPacket>
+        data: PropTypes.object, // ApiBooking; should only be omitted before it is created
+        dataReloader: PropTypes.func.isRequired,
+        onError: PropTypes.func.isRequired,
+    }
+
     constructor(props) {
         super(props)
 
