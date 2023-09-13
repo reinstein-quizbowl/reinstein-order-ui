@@ -161,7 +161,8 @@ export default class Step2Conference extends AbstractStep {
                 <div className="input-widget-container">
                     <FormControl>
                         <FormLabel id="orderingForConferenceLabel" required>
-                            Are you in charge of ordering questions for a conference or tournament?
+                            Are you in charge of ordering all of the questions for all of the games that all of the teams play for a conference or tournament?{' '}
+                            If you are only ordering questions for games that your team plays or only for games that your school hosts, choose &ldquo;No&rdquo;.
                         </FormLabel>
                         <RadioGroup
                             aria-labelledby="orderingForConferenceLabel"
