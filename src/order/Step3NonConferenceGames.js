@@ -143,7 +143,10 @@ export default class Step3NonConferenceGames extends AbstractStep {
                 <div className="input-widget-container">
                     <FormControl>
                         <FormLabel id="orderNonConferenceGamesLabel" required>
-                            Do you want to order questions for games that are not part of your conference?
+                            {data && data.conference ?
+                                'Do you want to order questions for games that are not part of your conference?' :
+                                'Do you want to order questions for games that your school is playing in or hosting?'
+                            }
                         </FormLabel>
                         <RadioGroup
                             aria-labelledby="orderNonConferenceGamesLabel"
