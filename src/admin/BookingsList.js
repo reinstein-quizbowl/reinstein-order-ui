@@ -214,8 +214,8 @@ class BookingsListImpl extends React.PureComponent {
     renderBookingRow = booking => <BookingSummaryRow key={booking.id} booking={booking} schoolsById={this.state.schoolsById} />
 
     renderBookings = () => {
-        const { bookings, statusCodes, sortBy, sortDirection } = this.state
-        if (!bookings) return null
+        const { bookings, schoolsById, statusCodes, sortBy, sortDirection } = this.state
+        if (!bookings || !schoolsById) return null
         if (bookings.length === 0) return <p>No results for {statusCodes.length === 1 ? 'this status' : 'these statuses' }.</p>
 
         return (
