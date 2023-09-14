@@ -262,6 +262,7 @@ class BookingsListImpl extends React.PureComponent {
                     value={bookings.map(it => it.emailAddress).join('; ')}
                     inputProps={{ className: 'input' }}
                     fullWidth
+                    multiline
                 />
             </FormControl>
         )
