@@ -67,6 +67,7 @@ const SchoolPicker = props => {
             blurOnSelect
             clearOnBlur
             options={props.schools.sort(byShortName)}
+            isOptionEqualToValue={(option, value) => option === value || (option && option.id === value)}
             onChange={(_, school) => props.onChange(school.id)}
             autoHighlight
             getOptionLabel={option => renderOptionLabel(option, props.schools)}
