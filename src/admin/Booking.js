@@ -3,15 +3,18 @@ import { Link, useParams } from 'react-router-dom'
 import { useErrorBoundary } from 'react-error-boundary'
 import dayjs from 'dayjs'
 
-import { Button, FormControl, FormLabel, MenuItem, Select, TextField } from '@mui/material'
+import { Button, MenuItem, Select, TextField } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import validator from 'validator'
 
 import Api from '../api/Api'
 import InvoiceLinesTable from '../invoice/InvoiceLinesTable'
-import { ALL_STATUSES } from '../util/bookingUtil'
+import { ALL_STATUSES, AUTHORITIES } from '../util/bookingUtil'
 import { SENTINEL_NULL_DATE, formatMoney, groupById, setStatePromise } from '../util/util'
+import DisplayOrEditDialog from '../util-components/DisplayOrEditDialog'
 import Loading from '../util-components/Loading'
 import LoadingOverlay from '../util-components/LoadingOverlay'
+import SchoolPicker from '../util-components/SchoolPicker'
 
 const Booking = (props) => {
     const params = useParams()
@@ -30,6 +33,10 @@ class BookingImpl extends React.PureComponent {
             booking: null,
             schoolsById: null,
 
+            schoolId: null,
+            name: '',
+            emailAddress: '',
+            authority: '',
             statusCode: null,
             shipDate: null,
             paymentReceivedDate: null,
@@ -51,6 +58,10 @@ class BookingImpl extends React.PureComponent {
         const booking = await Api.get(`/bookings/${creationId}`)
         await setStatePromise(this, {
             booking,
+            schoolId: booking.school ? booking.school.id : null,
+            name: booking.name || '',
+            emailAddress: booking.emailAddress || '',
+            authority: booking.authority || '',
             statusCode: booking.statusCode,
             shipDate: booking.shipDate ? dayjs(booking.shipDate) : null,
             paymentReceivedDate: booking.paymentReceivedDate ? dayjs(booking.paymentReceivedDate) : null,
@@ -63,19 +74,11 @@ class BookingImpl extends React.PureComponent {
         this.setState({ schoolsById: groupById(schools) })
     }
 
-    handleTextFieldChange = e => this.setState({ [e.target.name]: e.target.value })
-
-    handleShipDateFieldChange = shipDate => this.setState({ shipDate })
-
-    handlePaymentReceivedDateFieldChange = paymentReceivedDate => this.setState({ paymentReceivedDate })
-
-    handleStatusChange = event => this.setState({ statusCode: event.target.value })
-
     handleSubmit = async (e) => {
         e.preventDefault()
 
         const { onError } = this.props
-        const { booking, statusCode, shipDate, paymentReceivedDate, internalNote } = this.state
+        const { booking, schoolsById, schoolId, name, emailAddress, authority, statusCode, shipDate, paymentReceivedDate, internalNote } = this.state
         
         const error = this.determineError()
         if (error) {
@@ -84,6 +87,10 @@ class BookingImpl extends React.PureComponent {
             await setStatePromise(this, { saving: true })
 
             const payload = {
+                school: schoolsById[schoolId],
+                name,
+                emailAddress,
+                authority,
                 statusCode,
                 shipDate: shipDate || SENTINEL_NULL_DATE ,
                 paymentReceivedDate: paymentReceivedDate || SENTINEL_NULL_DATE,
@@ -200,16 +207,12 @@ class BookingImpl extends React.PureComponent {
     }
 
     render() {
-        const { booking, schoolsById, statusCode, shipDate, paymentReceivedDate, internalNote, showError, saving } = this.state
+        const { booking, schoolsById, schoolId, name, emailAddress, authority, statusCode, shipDate, paymentReceivedDate, internalNote, showError, saving } = this.state
         if (!booking || !schoolsById) return <Loading />
 
         const basicData = [
             { key: 'ID (internal)', value: booking.creationId },
-            { key: 'Submitted', value: dayjs(booking.createdAt).format('M/D/YY') },
-            { key: 'Orderer school', value: `${booking.school.shortName} (${booking.school.city}, ${booking.school.state})` },
-            { key: 'Orderer name', value: booking.name },
-            { key: 'Orderer authority', value: booking.authority },
-            { key: 'Orderer email address', value: <a href={`mailto:${booking.emailAddress}`}>{booking.emailAddress}</a> },
+            { key: 'Submitted', value: dayjs(booking.createdAt).format('MMMM D, YYYY') },
             { key: 'Invoice', value: <><Link to={`/order/${booking.creationId}/invoice`}>{booking.invoiceLabel}</Link>{booking.requestsW9 && ' (requests W-9)'}</> },
             { key: 'Total cost', value: formatMoney(booking.cost, true) },
         ]
@@ -218,6 +221,8 @@ class BookingImpl extends React.PureComponent {
         }
 
         const error = this.determineError()
+
+        const selectedSchool = schoolsById[schoolId]
 
         return (
             <form onSubmit={this.handleSubmit}>
@@ -234,71 +239,124 @@ class BookingImpl extends React.PureComponent {
                         ))}
                     </dl>
 
-                    <div className="input-widget-container">
-                        <FormControl fullWidth>
-                            <FormLabel id="statusLabel" htmlFor="status" required>
-                                Status
-                            </FormLabel>
-                            <Select
-                                labelId="statusLabel"
-                                id="status"
-                                value={statusCode}
-                                onChange={this.handleStatusChange}
-                                size="small"
-                            >
+                    <DisplayOrEditDialog
+                        id="school"
+                        displayFieldName="School"
+                        displayValue={`${selectedSchool.shortName} (${selectedSchool.name}, ${selectedSchool.city}, ${selectedSchool.state})`}
+                        dialogTitle="Edit school"
+                        editWidget={
+                            <SchoolPicker
+                                id="school"
+                                schools={Object.values(schoolsById)}
+                                placeholder="Choose school&hellip;"
+                                onChange={() => null} // will be filled in by DisplayOrEditDialog, but the proptype is required
+                            />
+                        }
+                        initialValue={schoolId}
+                        onSubmit={newValue => this.setState({ schoolId: newValue })}
+                    />
+
+                    <DisplayOrEditDialog
+                        id="name"
+                        displayFieldName="Orderer name"
+                        displayValue={name}
+                        dialogTitle="Edit orderer name"
+                        editWidget={
+                            <TextField
+                                name="name"
+                                inputProps={{ className: 'input' }}
+                                required
+                                fullWidth
+                            />
+                        }
+                        initialValue={name}
+                        onSubmit={newValue => this.setState({ name: newValue })}
+                    />
+
+                    <DisplayOrEditDialog
+                        id="emailAddress"
+                        displayFieldName="Orderer email address"
+                        displayValue={emailAddress}
+                        dialogTitle="Edit orderer email address"
+                        editWidget={
+                            <TextField
+                                name="emailAddress"
+                                type="email"
+                                inputProps={{ className: 'input' }}
+                                required
+                                fullWidth
+                            />
+                        }
+                        initialValue={emailAddress}
+                        validator={value => validator.isEmail(value) ? '' : 'Not a valid email address'}
+                        onSubmit={newValue => this.setState({ emailAddress: newValue })}
+                    />
+
+                    <DisplayOrEditDialog
+                        id="authority"
+                        displayFieldName="Authority"
+                        displayValue={authority}
+                        dialogTitle="Edit authority"
+                        editWidget={
+                            <Select fullWidth>
+                                {Object.keys(AUTHORITIES).map(code => <MenuItem key={code} value={AUTHORITIES[code]}>{AUTHORITIES[code]}</MenuItem>)}
+                            </Select>
+                        }
+                        initialValue={authority}
+                        onSubmit={newValue => this.setState({ authority: newValue })}
+                    />
+
+                    <DisplayOrEditDialog
+                        id="status"
+                        displayFieldName="Status"
+                        displayValue={ALL_STATUSES.find(status => status.code === statusCode).label}
+                        dialogTitle="Edit status"
+                        editWidget={
+                            <Select fullWidth>
                                 {ALL_STATUSES.map(status => <MenuItem key={status.code} value={status.code}>{status.label}</MenuItem>)}
                             </Select>
-                        </FormControl>
-                    </div>
+                        }
+                        initialValue={statusCode}
+                        onSubmit={newValue => this.setState({ statusCode: newValue })}
+                    />
 
-                    <div className="input-widget-container">
-                        <FormControl fullWidth>
-                            <FormLabel id="shipDateLabel" htmlFor="shipDate">
-                                Shipped on
-                            </FormLabel>
-                            <DatePicker
-                                id="shipDate"
-                                aria-labelledby="shipDateLabel"
-                                value={shipDate}
-                                onChange={this.handleShipDateFieldChange}
-                                className="date-field"
-                            />
-                        </FormControl>
-                    </div>
+                    <DisplayOrEditDialog
+                        id="shipDate"
+                        displayFieldName="Shipped on"
+                        displayValue={shipDate ? dayjs(shipDate).format('MMMM D, YYYY') : '[not yet]'}
+                        dialogTitle="Edit shipped-on date"
+                        editWidget={<DatePicker className="date-field" />}
+                        initialValue={shipDate}
+                        onSubmit={newValue => this.setState({ shipDate: newValue })}
+                    />
 
-                    <div className="input-widget-container">
-                        <FormControl fullWidth>
-                            <FormLabel id="paymentReceivedDateLabel" htmlFor="paymentReceived">
-                                Payment received on
-                            </FormLabel>
-                            <DatePicker
-                                id="paymentReceivedDate"
-                                aria-labelledby="paymentReceivedDateLabel"
-                                value={paymentReceivedDate}
-                                onChange={this.handlePaymentReceivedDateFieldChange}
-                                className="date-field"
-                            />
-                        </FormControl>
-                    </div>
+                    <DisplayOrEditDialog
+                        id="paymentReceived"
+                        displayFieldName="Payment received on"
+                        displayValue={paymentReceivedDate ? dayjs(paymentReceivedDate).format('MMMM D, YYYY') : '[not yet]'}
+                        dialogTitle="Edit payment-received date"
+                        editWidget={<DatePicker className="date-field" />}
+                        initialValue={paymentReceivedDate}
+                        onSubmit={newValue => this.setState({ paymentReceivedDate: newValue })}
+                    />
 
-                    <div className="input-widget-container">
-                        <FormControl fullWidth>
-                            <FormLabel id="internalNoteLabel" htmlFor="internalNote">
-                                Internal note
-                            </FormLabel>
+                    <DisplayOrEditDialog
+                        id="internalNote"
+                        displayFieldName="Internal note"
+                        displayValue={<span className="preserve-whitespace">{internalNote || '[none]'}</span>}
+                        dialogTitle="Edit internal note"
+                        editWidget={
                             <TextField
-                                aria-labelledby="internalNoteLabel"
-                                id="internalNote"
                                 name="internalNote"
-                                value={internalNote}
-                                onChange={this.handleTextFieldChange}
                                 inputProps={{ className: 'input' }}
                                 required
                                 fullWidth
                                 multiline
                             />
-                        </FormControl>
-                    </div>
+                        }
+                        initialValue={internalNote}
+                        onSubmit={newValue => this.setState({ internalNote: newValue })}
+                    />
                 </section>
 
                 {showError && <p className="form-error">{error}</p>}
