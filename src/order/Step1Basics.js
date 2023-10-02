@@ -11,12 +11,7 @@ import Api from '../api/Api'
 import Mailto from '../util-components/Mailto'
 import SchoolPicker from '../util-components/SchoolPicker'
 import { isBoolean } from '../util/util'
-
-const AUTHORITIES = {
-    coach: 'they are the coach',
-    coachKnows: 'the coach knows about the order',
-    coachDoesntKnow: "the coach doesn't know about the order",
-}
+import { AUTHORITIES } from '../util/bookingUtil'
 
 export default class Step1Basics extends AbstractStep {
     constructor(props) {

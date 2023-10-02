@@ -17,3 +17,9 @@ export const getStatusLabel = (statusCode) => {
         return null
     }
 }
+
+export const AUTHORITIES = {
+    coach: 'they are the coach',
+    coachKnows: 'the coach knows about the order',
+    coachDoesntKnow: "the coach doesn't know about the order",
+}
