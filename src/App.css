@@ -240,3 +240,19 @@ dd ul, dd ol {
 	margin-left: 0.5rem;
 	margin-bottom: 0;
 }
+
+.display-or-edit-container-outer {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+}
+
+.display-or-edit-container-inner {
+	flex: 1;
+	max-width: 500px;
+	margin-bottom: 1rem;
+}
+
+.preserve-whitespace {
+	white-space: pre-wrap;
+}
