@@ -102,6 +102,18 @@ class BookingImpl extends React.PureComponent {
         }
     }
 
+    resendConfirmation = async () => {
+        const { booking } = this.state
+
+        await setStatePromise(this, { saving: true }) // not literally, but the busy indicator is useful
+
+        await Api.post(`/bookings/${booking.creationId}/confirm`)
+
+        await setStatePromise(this, { saving: false })
+
+        alert('The confirmation emails (both internal and external) have been re-sent.')
+    }
+
     determineError = () => {
         // There isn't actually anything to check here, but I'm leaving the structure for ease of expansion
 
@@ -369,6 +381,16 @@ class BookingImpl extends React.PureComponent {
                         disabled={showError && !!error}
                     >
                         Save
+                    </Button>
+                    
+                    {'\u00a0\u00a0\u00a0\u00a0'}
+
+                    <Button
+                        type="button"
+                        onClick={this.resendConfirmation}
+                        variant="outlined"
+                    >
+                        Re-Send Confirmation Emails
                     </Button>
                 </p>
 
