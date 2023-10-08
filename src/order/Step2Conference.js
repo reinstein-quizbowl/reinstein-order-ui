@@ -180,7 +180,7 @@ export default class Step2Conference extends AbstractStep {
                     <>
                         <div className="input-widget-container">
                             <FormControl fullWidth>
-                                <FormLabel id="conferenceNameLabel" htmlFor="email" required>
+                                <FormLabel id="conferenceNameLabel" htmlFor="conferenceName" required>
                                     What is the name of the conference?
                                 </FormLabel>
                                 <TextField
@@ -217,7 +217,7 @@ export default class Step2Conference extends AbstractStep {
 
                         <div className="input-widget-container">
                             <FormControl fullWidth>
-                                <FormLabel id="packetsRequestedLabel" htmlFor="email" required>
+                                <FormLabel id="packetsRequestedLabel" htmlFor="packetsRequested" required>
                                     How many packets (rounds’ worth of questions) do you want to order?
                                 </FormLabel>
                                 <TextField
