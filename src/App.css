@@ -256,3 +256,7 @@ dd ul, dd ol {
 .preserve-whitespace {
 	white-space: pre-wrap;
 }
+
+.two-columns {
+	column-count: 2; /* TODO: only on large enough screens */
+}

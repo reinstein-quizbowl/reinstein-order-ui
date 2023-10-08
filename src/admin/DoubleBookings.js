@@ -74,7 +74,7 @@ class DoubleBookingsImpl extends React.PureComponent {
 
         return (
             <li key={`${exposedSchool.id}-${packet.id}-${exposure.sourceId}`}>
-                {exposedSchool.shortName} is booked to hear {packet.yearCode} packet {packet.number} at {exposure.source} (ID {exposure.sourceId}){' '}
+                {exposedSchool.shortName} is booked to hear {packet.name} at {exposure.source} (ID {exposure.sourceId}){' '}
                 <Link to={`/admin/order/${exposure.bookingCreationId}`}>(order placed by {ordererSchool.shortName})</Link>
             </li>
         )

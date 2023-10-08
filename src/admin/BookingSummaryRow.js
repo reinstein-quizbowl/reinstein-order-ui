@@ -61,7 +61,7 @@ const renderPractice = (stateSeries, packets, compilations) => {
             <Tooltip title={(
                 <ul>
                     {stateSeries.map(ss => <li key={`ss-${ss.id}`}>{ss.stateSeries.name}</li>)}
-                    {packets.map(p => <li key={`p-${p.id}`}>{p.packet.yearCode} packet {p.packet.number}</li>)}
+                    {packets.map(p => <li key={`p-${p.id}`}>{p.packet.name}</li>)}
                     {compilations.map(c => <li key={`c-${c.id}`}>{c.compilation.name}</li>)}
                 </ul>
             )}>

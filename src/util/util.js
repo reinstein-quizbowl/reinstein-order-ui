@@ -5,7 +5,6 @@ export const SENTINEL_NULL_DATE = '1900-01-01'
 export const isBoolean = value => value === true || value === false
 
 export const makeEnglishList = (values, conjunction = 'and') => {
-
     if (!values || values.length === 0) return null
 
     if (values.length === 1) return values[0]

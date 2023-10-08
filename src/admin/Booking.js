@@ -3,15 +3,18 @@ import { Link, useParams } from 'react-router-dom'
 import { useErrorBoundary } from 'react-error-boundary'
 import dayjs from 'dayjs'
 
-import { Button, MenuItem, Select, TextField } from '@mui/material'
+import { Button, IconButton, MenuItem, Select, TextField } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import { Close } from '@mui/icons-material'
 import validator from 'validator'
 
+import BookingConferencePackets from './BookingConferencePackets'
+import BookingConferenceSchools from './BookingConferenceSchools'
 import Api from '../api/Api'
 import InvoiceLinesTable from '../invoice/InvoiceLinesTable'
 import { ALL_STATUSES, AUTHORITIES } from '../util/bookingUtil'
 import { SENTINEL_NULL_DATE, formatMoney, groupById, setStatePromise } from '../util/util'
-import DisplayOrEditDialog from '../util-components/DisplayOrEditDialog'
+import SimpleDisplayOrEditDialog from '../util-components/SimpleDisplayOrEditDialog'
 import Loading from '../util-components/Loading'
 import LoadingOverlay from '../util-components/LoadingOverlay'
 import SchoolPicker from '../util-components/SchoolPicker'
@@ -31,6 +34,7 @@ class BookingImpl extends React.PureComponent {
 
         this.state = {
             booking: null,
+            packetsById: null,
             schoolsById: null,
 
             schoolId: null,
@@ -41,6 +45,9 @@ class BookingImpl extends React.PureComponent {
             shipDate: null,
             paymentReceivedDate: null,
             internalNote: '',
+
+            conference: null,
+
             showError: false,
             saving: false,
         }
@@ -48,6 +55,7 @@ class BookingImpl extends React.PureComponent {
 
     componentDidMount() {
         this.loadBooking()
+        this.loadPackets()
         this.loadSchools()
         document.title = 'Edit Order \u2013 Reinstein QuizBowl'
     }
@@ -66,7 +74,13 @@ class BookingImpl extends React.PureComponent {
             shipDate: booking.shipDate ? dayjs(booking.shipDate) : null,
             paymentReceivedDate: booking.paymentReceivedDate ? dayjs(booking.paymentReceivedDate) : null,
             internalNote: booking.internalNote || '',
+            conference: booking.conference,
         })
+    }
+
+    loadPackets = async () => {
+        const packets = await Api.get('/packets')
+        this.setState({ packetsById: groupById(packets) })
     }
 
     loadSchools = async () => {
@@ -74,11 +88,17 @@ class BookingImpl extends React.PureComponent {
         this.setState({ schoolsById: groupById(schools) })
     }
 
+    handleConferenceUpdate = conference => this.setState({ conference })
+
     handleSubmit = async (e) => {
         e.preventDefault()
 
         const { onError } = this.props
-        const { booking, schoolsById, schoolId, name, emailAddress, authority, statusCode, shipDate, paymentReceivedDate, internalNote } = this.state
+        const {
+            booking, schoolsById,
+            schoolId, name, emailAddress, authority, statusCode, shipDate, paymentReceivedDate, internalNote,
+            conference,
+        } = this.state
         
         const error = this.determineError()
         if (error) {
@@ -96,10 +116,27 @@ class BookingImpl extends React.PureComponent {
                 paymentReceivedDate: paymentReceivedDate || SENTINEL_NULL_DATE,
                 internalNote,
             }
-    
-            const updated = await Api.post(`/bookings/${booking.creationId}`, payload, onError)
+            let updated = await Api.post(`/bookings/${booking.creationId}`, payload, onError)
+
+            if (booking.conference && !conference) {
+                await Api.delete(`/bookings/${booking.creationId}/conference`)
+                updated = await Api.get(`/bookings/${booking.creationId}`)
+            } else if (conference.modified) {
+                updated = await Api.post(`/bookings/${booking.creationId}/conference`, conference)
+            }
+
             await setStatePromise(this, { booking: updated, saving: false })
         }
+    }
+
+    recalculateInvoice = async () => {
+        const { booking } = this.state
+
+        await setStatePromise(this, { saving: true }) // not literally, but the busy indicator is useful
+
+        const updated = await Api.post(`/bookings/${booking.creationId}/recalculateInvoice`)
+
+        await setStatePromise(this, { booking: updated, saving: false })
     }
 
     resendConfirmation = async () => {
@@ -120,38 +157,59 @@ class BookingImpl extends React.PureComponent {
         return null
     }
 
-    renderConference = (conference) => {
-        const { schoolsById } = this.state
-        
-        if (conference) {
-            return (
-                <dl>
-                    <div>
-                        <dt>Name</dt>
-                        <dd>{conference.name}</dd>
-                    </div>
-                    <div>
-                        <dt>Schools</dt>
-                        <dd>
-                            <ul>
-                                {conference.schoolIds.map(id => <li key={id}>{schoolsById[id].shortName}</li>)}
-                            </ul>
-                        </dd>
-                    </div>
-                    <div>
-                        <dt>Packets</dt>
-                        <dd>
-                            <ul>
-                                {conference.assignedPackets.length === 0 && <li className="form-error">Not assigned</li>}
-                                {conference.assignedPackets.map(packet => <li key={packet.id}>{packet.yearCode} packet {packet.number}</li>)}
-                            </ul>
-                        </dd>
-                    </div>
-                </dl>
-            )
-        } else {
-            return <p>This order does not involve a conference.</p>
+    renderConference() {
+        const { booking, conference, packetsById, schoolsById } = this.state
+
+        if (!conference) {
+            if (booking.conference) {
+                return <p>The conference will be deleted when you save changes.</p>
+            } else {
+                return (
+                    <>
+                        <p>This order does not involve a conference.</p>
+                        <p>
+                            <Button variant="outlined" onClick={() => this.setState({ conference: { name: '', packetsRequested: 0, schoolIds: [], assignedPackets: [] } })}>
+                                Add Conference
+                            </Button>
+                        </p>
+                    </>
+                )
+            }
         }
+
+        return (
+            <>
+                <SimpleDisplayOrEditDialog
+                    id="conferenceName"
+                    displayFieldName="Name"
+                    displayValue={conference.name}
+                    dialogTitle="Edit conference name"
+                    editWidget={
+                        <TextField
+                            name="conferenceName"
+                            inputProps={{ className: 'input' }}
+                            required
+                            fullWidth
+                        />
+                    }
+                    initialValue={conference.name}
+                    onSubmit={newValue => this.setState(prevState => ({ conference: Object.assign({}, prevState.conference, { name: newValue, modified: true }) }))}
+                />
+
+                <BookingConferenceSchools
+                    conference={conference}
+                    ordererSchool={booking.school}
+                    schoolsById={schoolsById}
+                    onSubmit={schoolIds => this.setState(prevState => ({ conference: Object.assign({}, prevState.conference, { schoolIds, modified: true }) }))}
+                />
+                
+                <BookingConferencePackets
+                    conference={conference}
+                    packetsById={packetsById}
+                    onSubmit={(packetsRequested, assignedPackets) => this.setState(prevState => ({ conference: Object.assign({}, prevState.conference, { packetsRequested, assignedPackets, modified: true }) }))}
+                />
+            </>
+        )
     }
 
     renderNonConferenceGames = (nonConferenceGames) => {
@@ -162,7 +220,7 @@ class BookingImpl extends React.PureComponent {
                 <dl>
                     {nonConferenceGames.map(game => (
                         <div key={game.id}>
-                            <dt>{game.assignedPacket ? `${game.assignedPacket.yearCode} packet ${game.assignedPacket.number}` : <span className="form-error">Packet TBD</span>}</dt>
+                            <dt>{game.assignedPacket ? `${game.assignedPacket.name}` : <span className="form-error">Packet TBD</span>}</dt>
                             <dd>
                                 <ul>
                                     {game.schoolIds.map(id => <li key={id}>{schoolsById[id].shortName}</li>)}
@@ -196,7 +254,7 @@ class BookingImpl extends React.PureComponent {
                             <dt>Regular-Season Packets</dt>
                             <dd>
                                 <ul>
-                                    {packetOrders.map(p => <li key={`p-${p.id}`}>{p.packet.yearCode} packet {p.packet.number}</li>)}
+                                    {packetOrders.map(p => <li key={`p-${p.id}`}>{p.packet.name}</li>)}
                                 </ul>
                             </dd>
                         </div>
@@ -219,8 +277,13 @@ class BookingImpl extends React.PureComponent {
     }
 
     render() {
-        const { booking, schoolsById, schoolId, name, emailAddress, authority, statusCode, shipDate, paymentReceivedDate, internalNote, showError, saving } = this.state
-        if (!booking || !schoolsById) return <Loading />
+        const {
+            booking,
+            schoolId, name, emailAddress, authority, statusCode, shipDate, paymentReceivedDate, internalNote,
+            showError, saving,
+            packetsById, schoolsById,
+        } = this.state
+        if (!booking || !packetsById || !schoolsById) return <Loading />
 
         const basicData = [
             { key: 'ID (internal)', value: booking.creationId },
@@ -251,7 +314,7 @@ class BookingImpl extends React.PureComponent {
                         ))}
                     </dl>
 
-                    <DisplayOrEditDialog
+                    <SimpleDisplayOrEditDialog
                         id="school"
                         displayFieldName="School"
                         displayValue={`${selectedSchool.shortName} (${selectedSchool.name}, ${selectedSchool.city}, ${selectedSchool.state})`}
@@ -261,14 +324,14 @@ class BookingImpl extends React.PureComponent {
                                 id="school"
                                 schools={Object.values(schoolsById)}
                                 placeholder="Choose school&hellip;"
-                                onChange={() => null} // will be filled in by DisplayOrEditDialog, but the proptype is required
+                                onChange={() => null} // will be filled in by SimpleDisplayOrEditDialog, but the proptype is required
                             />
                         }
                         initialValue={schoolId}
                         onSubmit={newValue => this.setState({ schoolId: newValue })}
                     />
 
-                    <DisplayOrEditDialog
+                    <SimpleDisplayOrEditDialog
                         id="name"
                         displayFieldName="Orderer name"
                         displayValue={name}
@@ -285,7 +348,7 @@ class BookingImpl extends React.PureComponent {
                         onSubmit={newValue => this.setState({ name: newValue })}
                     />
 
-                    <DisplayOrEditDialog
+                    <SimpleDisplayOrEditDialog
                         id="emailAddress"
                         displayFieldName="Orderer email address"
                         displayValue={emailAddress}
@@ -304,7 +367,7 @@ class BookingImpl extends React.PureComponent {
                         onSubmit={newValue => this.setState({ emailAddress: newValue })}
                     />
 
-                    <DisplayOrEditDialog
+                    <SimpleDisplayOrEditDialog
                         id="authority"
                         displayFieldName="Authority"
                         displayValue={authority}
@@ -318,7 +381,7 @@ class BookingImpl extends React.PureComponent {
                         onSubmit={newValue => this.setState({ authority: newValue })}
                     />
 
-                    <DisplayOrEditDialog
+                    <SimpleDisplayOrEditDialog
                         id="status"
                         displayFieldName="Status"
                         displayValue={ALL_STATUSES.find(status => status.code === statusCode).label}
@@ -332,7 +395,7 @@ class BookingImpl extends React.PureComponent {
                         onSubmit={newValue => this.setState({ statusCode: newValue })}
                     />
 
-                    <DisplayOrEditDialog
+                    <SimpleDisplayOrEditDialog
                         id="shipDate"
                         displayFieldName="Shipped on"
                         displayValue={shipDate ? dayjs(shipDate).format('MMMM D, YYYY') : '[not yet]'}
@@ -342,7 +405,7 @@ class BookingImpl extends React.PureComponent {
                         onSubmit={newValue => this.setState({ shipDate: newValue })}
                     />
 
-                    <DisplayOrEditDialog
+                    <SimpleDisplayOrEditDialog
                         id="paymentReceived"
                         displayFieldName="Payment received on"
                         displayValue={paymentReceivedDate ? dayjs(paymentReceivedDate).format('MMMM D, YYYY') : '[not yet]'}
@@ -352,7 +415,7 @@ class BookingImpl extends React.PureComponent {
                         onSubmit={newValue => this.setState({ paymentReceivedDate: newValue })}
                     />
 
-                    <DisplayOrEditDialog
+                    <SimpleDisplayOrEditDialog
                         id="internalNote"
                         displayFieldName="Internal note"
                         displayValue={<span className="preserve-whitespace">{internalNote || '[none]'}</span>}
@@ -369,6 +432,30 @@ class BookingImpl extends React.PureComponent {
                         initialValue={internalNote}
                         onSubmit={newValue => this.setState({ internalNote: newValue })}
                     />
+                </section>
+
+                <section id="conference">
+                    <div className="display-or-edit-container-outer">
+                        <h2 className="display-or-edit-container-inner">Conference</h2>
+                        
+                        <IconButton size="small" onClick={() => this.setState({ conference: null })}>
+                            <Close />
+                        </IconButton>
+                    </div>
+
+                    {this.renderConference(booking.conference)}
+                </section>
+
+                <section id="non-conference">
+                    <h2>Non-Conference Games</h2>
+
+                    {this.renderNonConferenceGames(booking.nonConferenceGames)}
+                </section>
+
+                <section id="practice-material">
+                    <h2>Practice Material</h2>
+
+                    {this.renderPracticeMaterial(booking.stateSeriesOrders, booking.packetOrders, booking.compilationOrders)}
                 </section>
 
                 {showError && <p className="form-error">{error}</p>}
@@ -393,30 +480,20 @@ class BookingImpl extends React.PureComponent {
                         Re-Send Confirmation Emails
                     </Button>
                 </p>
-
-                <section id="conference">
-                    <h2>Conference</h2>
-
-                    {this.renderConference(booking.conference)}
-                </section>
-
-                <section id="non-conference">
-                    <h2>Non-Conference Games</h2>
-
-                    {this.renderNonConferenceGames(booking.nonConferenceGames)}
-                </section>
-
-                <section id="practice-material">
-                    <h2>Practice Material</h2>
-
-                    {this.renderPracticeMaterial(booking.stateSeriesOrders, booking.packetOrders, booking.compilationOrders)}
-                </section>
                 
                 <section id="invoice">
-                    <h2>
-                        Invoice
-                        <Button component={Link} to={`/order/${booking.creationId}/invoice`}>View printable</Button>
-                    </h2>
+                <div className="display-or-edit-container-outer">
+                    <h2 className="display-or-edit-container-inner">Invoice</h2>
+                    <div>
+                        <Button variant="outlined" onClick={this.recalculateInvoice}>
+                            {booking.invoiceLines && booking.invoiceLines.length > 0 ? 'Recalculate' : 'Calculate'}
+                        </Button>
+                        {'\u00a0\u00a0\u00a0\u00a0'}
+                        <Button component={Link} variant="outlined" to={`/order/${booking.creationId}/invoice`}>
+                            View printable
+                        </Button>
+                    </div>
+                </div>
 
                     {booking.invoiceLines && booking.invoiceLines.length > 0 ?
                         <InvoiceLinesTable lines={booking.invoiceLines} /> :

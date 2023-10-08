@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormLabel, IconButton, Tooltip } from '@mui/material'
 import { Edit } from '@mui/icons-material'
 
-const DisplayOrEditDialog = (props) => {
+const SimpleDisplayOrEditDialog = (props) => {
     const { id, displayFieldName, displayValue, dialogTitle, editWidget, initialValue, validator, onSubmit } = props
 
     const [editing, setEditing] = useState(false)
@@ -86,7 +86,7 @@ const DisplayOrEditDialog = (props) => {
     )
 }
 
-DisplayOrEditDialog.propTypes = {
+SimpleDisplayOrEditDialog.propTypes = {
     id: PropTypes.string.isRequired,
     displayFieldName: PropTypes.node.isRequired,
     displayValue: PropTypes.node.isRequired,
@@ -97,4 +97,4 @@ DisplayOrEditDialog.propTypes = {
     onSubmit: PropTypes.func.isRequired, // newValue => ?
 }
 
-export default DisplayOrEditDialog
+export default SimpleDisplayOrEditDialog
