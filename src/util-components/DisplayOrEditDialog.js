@@ -77,8 +77,8 @@ const DisplayOrEditDialog = (props) => {
                     </Dialog>
                 </FormControl>
             </div>
-            <Tooltip title={dialogTitleSafe}>{/* prevents the IconButton from growing weirdly */}
-                <IconButton size="small" onClick={() => setEditing(true)} className="display-or-edit-edit-button">
+            <Tooltip title={dialogTitleSafe}>
+                <IconButton size="small" onClick={() => setEditing(true)}>
                     <Edit />
                 </IconButton>
             </Tooltip>
