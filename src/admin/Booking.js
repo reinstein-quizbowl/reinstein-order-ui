@@ -1,9 +1,9 @@
 import React from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useErrorBoundary } from 'react-error-boundary'
 import dayjs from 'dayjs'
 
-import { Button, IconButton, MenuItem, Select, TextField } from '@mui/material'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Select, TextField } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { Close } from '@mui/icons-material'
 import validator from 'validator'
@@ -21,9 +21,10 @@ import SchoolPicker from '../util-components/SchoolPicker'
 
 const Booking = (props) => {
     const params = useParams()
+    const navigate = useNavigate()
     const { showBoundary: handleError } = useErrorBoundary()
 
-    return <BookingImpl creationId={params.creationId} onError={handleError} {...props} />
+    return <BookingImpl creationId={params.creationId} onError={handleError} navigate={navigate} {...props} />
 }
 
 Booking.propTypes = {}
@@ -48,6 +49,7 @@ class BookingImpl extends React.PureComponent {
 
             conference: null,
 
+            confirmingDelete: false,
             showError: false,
             saving: false,
         }
@@ -88,6 +90,10 @@ class BookingImpl extends React.PureComponent {
         this.setState({ schoolsById: groupById(schools) })
     }
 
+    startConfirmDelete = () => this.setState({ confirmingDelete: true })
+
+    closeConfirmDelete = () => this.setState({ confirmingDelete: false })
+
     handleConferenceUpdate = conference => this.setState({ conference })
 
     handleSubmit = async (e) => {
@@ -127,6 +133,17 @@ class BookingImpl extends React.PureComponent {
 
             await setStatePromise(this, { booking: updated, saving: false })
         }
+    }
+
+    handleDelete = async () => {
+        const { navigate } = this.props
+        const { booking } = this.state
+
+        await setStatePromise(this, { saving: true })
+
+        await Api.delete(`/bookings/${booking.creationId}`)
+
+        navigate('/admin/order')
     }
 
     recalculateInvoice = async () => {
@@ -280,7 +297,7 @@ class BookingImpl extends React.PureComponent {
         const {
             booking,
             schoolId, name, emailAddress, authority, statusCode, shipDate, paymentReceivedDate, internalNote,
-            showError, saving,
+            confirmingDelete, showError, saving,
             packetsById, schoolsById,
         } = this.state
         if (!booking || !packetsById || !schoolsById) return <Loading />
@@ -479,6 +496,17 @@ class BookingImpl extends React.PureComponent {
                     >
                         Re-Send Confirmation Emails
                     </Button>
+                    
+                    {'\u00a0\u00a0\u00a0\u00a0'}
+
+                    <Button
+                        type="button"
+                        variant="outlined"
+                        onClick={this.startConfirmDelete}
+                        color="warning"
+                    >
+                        Delete
+                    </Button>
                 </p>
                 
                 <section id="invoice">
@@ -500,6 +528,24 @@ class BookingImpl extends React.PureComponent {
                         <p className="form-error">None</p>
                     }
                 </section>
+
+                <Dialog open={confirmingDelete} onClose={this.closeConfirmDelete}>
+                    <DialogTitle>Delete order</DialogTitle>
+                    <DialogContent>
+                        <p>Are you sure you want to delete this booking?</p>
+                        <p>If you go ahead with deletion, this order will be impossible to recover. This could have effects on question security and many other things. It&rsquo;s entirely your responsibility to make sure you know what you&rsquo;re doing.</p>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button variant="outlined" onClick={this.closeConfirmDelete}>Never mind</Button>
+                        <Button
+                            variant="contained"
+                            onClick={this.handleDelete}
+                            color="warning"
+                        >
+                            Yes, delete
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </form>
         )
     }
