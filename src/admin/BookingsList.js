@@ -27,7 +27,7 @@ const HEADERS = [
 const BookingsList = (props) => {
     const navigate = useNavigate()
 
-    return <BookingsListImpl navigate={navigate}{...props} />
+    return <BookingsListImpl navigate={navigate} {...props} />
 }
 
 BookingsList.propTypes = {}
