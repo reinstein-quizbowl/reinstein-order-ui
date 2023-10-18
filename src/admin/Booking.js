@@ -127,7 +127,7 @@ class BookingImpl extends React.PureComponent {
             if (booking.conference && !conference) {
                 await Api.delete(`/bookings/${booking.creationId}/conference`)
                 updated = await Api.get(`/bookings/${booking.creationId}`)
-            } else if (conference.modified) {
+            } else if (conference && conference.modified) {
                 updated = await Api.post(`/bookings/${booking.creationId}/conference`, conference)
             }
 
