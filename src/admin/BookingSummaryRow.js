@@ -99,8 +99,8 @@ const BookingSummaryRow = ({ booking, schoolsById }) => {
                 {dayjs(booking.createdAt).format('M/D/YY')}
             </TableCell>
             <TableCell>
-                <Tooltip title={`${booking.school.name} (${booking.school.city}, ${booking.school.state})`}>
-                    <span>{booking.school.shortName}</span>
+                <Tooltip title={booking.school && `${booking.school.name} (${booking.school.city}, ${booking.school.state})`}>
+                    <span>{booking.school ? booking.school.shortName : 'None'}</span>
                 </Tooltip>
             </TableCell>
             <TableCell>
