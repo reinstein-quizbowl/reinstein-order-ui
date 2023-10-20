@@ -334,7 +334,7 @@ class BookingImpl extends React.PureComponent {
                     <SimpleDisplayOrEditDialog
                         id="school"
                         displayFieldName="School"
-                        displayValue={`${selectedSchool.shortName} (${selectedSchool.name}, ${selectedSchool.city}, ${selectedSchool.state})`}
+                        displayValue={selectedSchool ? `${selectedSchool.shortName} (${selectedSchool.name}, ${selectedSchool.city}, ${selectedSchool.state})` : 'None'}
                         dialogTitle="Edit school"
                         editWidget={
                             <SchoolPicker

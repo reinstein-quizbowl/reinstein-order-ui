@@ -54,7 +54,7 @@ class InvoicePageImpl extends React.PureComponent {
                 <p>Thank you for your order!</p>
 
                 <p>
-                    <strong>School:</strong> {booking.school.name}
+                    <strong>School:</strong> {booking.school ? booking.school.name : 'None'}
                     <br />
                     <strong>Placed by:</strong> {booking.name}
                     <br />
