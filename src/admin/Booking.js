@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Select, TextField, Tooltip } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
-import { Add, Close } from '@mui/icons-material'
+import { Add, Calculate, Close, Print } from '@mui/icons-material'
 import validator from 'validator'
 
 import BookingConferencePackets from './BookingConferencePackets'
@@ -519,13 +519,18 @@ class BookingImpl extends React.PureComponent {
                 <div className="display-or-edit-container-outer">
                     <h2 className="display-or-edit-container-inner">Invoice</h2>
                     <div>
-                        <Button variant="outlined" onClick={this.recalculateInvoice}>
-                            {booking.invoiceLines && booking.invoiceLines.length > 0 ? 'Recalculate' : 'Calculate'}
-                        </Button>
-                        {'\u00a0\u00a0\u00a0\u00a0'}
-                        <Button component={Link} variant="outlined" to={`/order/${booking.creationId}/invoice`}>
-                            View printable
-                        </Button>
+                        <Tooltip title={booking.invoiceLines && booking.invoiceLines.length > 0 ? 'Recalculate invoice' : 'Calculate invoice'}>
+                            <IconButton onClick={this.recalculateInvoice}>
+                                <Calculate />
+                            </IconButton>
+                        </Tooltip>
+                        {booking.invoiceLines && booking.invoiceLines.length > 0 && (
+                            <Tooltip title="View printable invoice">
+                                <IconButton component={Link} to={`/order/${booking.creationId}/invoice`}>
+                                    <Print />
+                                </IconButton>
+                            </Tooltip>
+                        )}
                     </div>
                 </div>
 
