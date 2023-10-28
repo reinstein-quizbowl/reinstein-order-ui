@@ -3,9 +3,9 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useErrorBoundary } from 'react-error-boundary'
 import dayjs from 'dayjs'
 
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Select, TextField } from '@mui/material'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Select, TextField, Tooltip } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
-import { Close } from '@mui/icons-material'
+import { Add, Close } from '@mui/icons-material'
 import validator from 'validator'
 
 import BookingConferencePackets from './BookingConferencePackets'
@@ -184,11 +184,6 @@ class BookingImpl extends React.PureComponent {
                 return (
                     <>
                         <p>This order does not involve a conference.</p>
-                        <p>
-                            <Button variant="outlined" onClick={() => this.setState({ conference: { name: '', packetsRequested: 0, schoolIds: [], assignedPackets: [] } })}>
-                                Add Conference
-                            </Button>
-                        </p>
                     </>
                 )
             }
@@ -297,6 +292,7 @@ class BookingImpl extends React.PureComponent {
         const {
             booking,
             schoolId, name, emailAddress, authority, statusCode, shipDate, paymentReceivedDate, internalNote,
+            conference,
             confirmingDelete, showError, saving,
             packetsById, schoolsById,
         } = this.state
@@ -455,12 +451,22 @@ class BookingImpl extends React.PureComponent {
                     <div className="display-or-edit-container-outer">
                         <h2 className="display-or-edit-container-inner">Conference</h2>
                         
-                        <IconButton size="small" onClick={() => this.setState({ conference: null })}>
-                            <Close />
-                        </IconButton>
+                        {conference ? (
+                            <Tooltip title="Remove conference">
+                                <IconButton size="small" onClick={() => this.setState({ conference: null })}>
+                                    <Close />
+                                </IconButton>
+                            </Tooltip>
+                        ) : (
+                            <Tooltip title="Add conference">
+                                <IconButton size="small" onClick={() => this.setState({ conference: { name: '', packetsRequested: 0, schoolIds: [], assignedPackets: [] } })}>
+                                    <Add />
+                                </IconButton>
+                            </Tooltip>
+                        )}
                     </div>
 
-                    {this.renderConference(booking.conference)}
+                    {this.renderConference()}
                 </section>
 
                 <section id="non-conference">
