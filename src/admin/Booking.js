@@ -5,11 +5,12 @@ import dayjs from 'dayjs'
 
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, ListSubheader, Menu, MenuItem, Select, TextField, Tooltip } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
-import { Add, Calculate, Close, Print } from '@mui/icons-material'
+import { Add, Calculate, Close, MoreVert, Print } from '@mui/icons-material'
 import validator from 'validator'
 
 import BookingConferencePackets from './BookingConferencePackets'
 import BookingConferenceSchools from './BookingConferenceSchools'
+import NonConferenceGamePacket from './NonConferenceGamePacket'
 import Api from '../api/Api'
 import InvoiceLinesTable from '../invoice/InvoiceLinesTable'
 import { ALL_STATUSES, AUTHORITIES } from '../util/bookingUtil'
@@ -51,6 +52,12 @@ class BookingImpl extends React.PureComponent {
 
             conference: null,
 
+            nonConferenceGames: null,
+            unassignPacketFromNonConferenceGameIds: [],
+            assignPacketForNonConferenceGameIds: [],
+            nonConferenceGameMenuElt: null,
+            assigningPacketForNonConferenceGameId: null,
+
             practiceStateSeriesIds: null,
             practicePacketIds: null,
             practiceCompilationIds: null,
@@ -87,9 +94,14 @@ class BookingImpl extends React.PureComponent {
             paymentReceivedDate: booking.paymentReceivedDate ? dayjs(booking.paymentReceivedDate) : null,
             internalNote: booking.internalNote || '',
             conference: booking.conference,
+            nonConferenceGames: booking.nonConferenceGames,
+            unassignPacketFromNonConferenceGameIds: [],
+            assignPacketForNonConferenceGameIds: [],
             practiceStateSeriesIds: booking.stateSeriesOrders.map(it => it.stateSeries.id),
             practicePacketIds: booking.packetOrders.map(it => it.packet.id),
             practiceCompilationIds: booking.compilationOrders.map(it => it.compilation.id),
+            saving: false,
+            modifiedPracticeMaterial: false,
         })
     }
 
@@ -113,6 +125,10 @@ class BookingImpl extends React.PureComponent {
         this.setState({ compilationsById: groupById(compilations) })
     }
 
+    openNonConferenceGameMenu = e => this.setState({ nonConferenceGameMenuElt: e.currentTarget })
+
+    closeNonConferenceGameMenu = () => this.setState({ nonConferenceGameMenuElt: null })
+
     startAddPracticeMaterial = e => this.setState({ addingPracticeMaterialElt: e.currentTarget })
 
     closeAddPracticeMaterial = () => this.setState({ addingPracticeMaterialElt: null })
@@ -130,7 +146,6 @@ class BookingImpl extends React.PureComponent {
             <Menu
                 anchorEl={addingPracticeMaterialElt}
                 open={!!addingPracticeMaterialElt}
-                onChange={this.addPracticeMaterialItem}
                 onClose={this.closeAddPracticeMaterial}
                 slotProps={{ paper: { style: { maxHeight: 500 } } }}
             >
@@ -184,6 +199,7 @@ class BookingImpl extends React.PureComponent {
             booking, schoolsById,
             schoolId, name, emailAddress, authority, statusCode, shipDate, paymentReceivedDate, internalNote,
             conference,
+            nonConferenceGames, unassignPacketFromNonConferenceGameIds, assignPacketForNonConferenceGameIds,
             practiceStateSeriesIds, practicePacketIds, practiceCompilationIds, modifiedPracticeMaterial,
         } = this.state
         
@@ -203,13 +219,37 @@ class BookingImpl extends React.PureComponent {
                 paymentReceivedDate: paymentReceivedDate || SENTINEL_NULL_DATE,
                 internalNote,
             }
-            let updated = await Api.post(`/bookings/${booking.creationId}`, payload, onError)
+            await Api.post(`/bookings/${booking.creationId}`, payload, onError)
 
             if (booking.conference && !conference) {
                 await Api.delete(`/bookings/${booking.creationId}/conference`)
-                updated = await Api.get(`/bookings/${booking.creationId}`)
             } else if (conference && conference.modified) {
-                updated = await Api.post(`/bookings/${booking.creationId}/conference`, conference)
+                await Api.post(`/bookings/${booking.creationId}/conference`, conference)
+            }
+
+            const originalNonConferenceGameIds = booking.nonConferenceGames.map(it => it.id)
+            const currentNonConferenceGameIds = nonConferenceGames.map(it => it.id)
+            const deletedNonConferenceGameIds = originalNonConferenceGameIds.filter(id => !currentNonConferenceGameIds.includes(id))
+            if (deletedNonConferenceGameIds.length > 0) {
+                const promises = deletedNonConferenceGameIds.map(id => Api.delete(`/bookings/${booking.creationId}/nonConferenceGames/${id}`, onError))
+                await Promise.all(promises)
+            }
+
+            if (unassignPacketFromNonConferenceGameIds.length > 0) {
+                const promises = unassignPacketFromNonConferenceGameIds.map(gameId => Api.delete(`/bookings/${booking.creationId}/nonConferenceGames/${gameId}/packet`, onError))
+                await Promise.all(promises)
+            }
+
+            if (assignPacketForNonConferenceGameIds.length > 0) {
+                const promises = []
+                for (const gameId of assignPacketForNonConferenceGameIds) {
+                    const game = nonConferenceGames.find(game => game.id === gameId)
+                    const packetId = game && game.assignedPacket ? game.assignedPacket.id : null
+                    if (packetId) {
+                        promises.push(Api.post(`/bookings/${booking.creationId}/nonConferenceGames/${gameId}/packet?packetId=${packetId}`, onError))
+                    }
+                }
+                await Promise.all(promises)
             }
 
             if (modifiedPracticeMaterial) {
@@ -219,10 +259,9 @@ class BookingImpl extends React.PureComponent {
                     Api.post(`/bookings/${booking.creationId}/practiceCompilations`, practiceCompilationIds, onError),
                 ]
                 await Promise.all(promises)
-                updated = await Api.get(`/bookings/${booking.creationId}`)
             }
 
-            await setStatePromise(this, { booking: updated, saving: false, modifiedPracticeMaterial: false })
+            await this.loadBooking()
         }
     }
 
@@ -315,23 +354,107 @@ class BookingImpl extends React.PureComponent {
         )
     }
 
-    renderNonConferenceGames = (nonConferenceGames) => {
-        const { schoolsById } = this.state
+    removeNonConferenceGame = removeGameId => this.setState(prevState => ({
+        nonConferenceGames: prevState.nonConferenceGames.filter(it => it.id !== removeGameId),
+        nonConferenceGameMenuElt: null,
+    }))
+
+    unassignNonConferenceGamePacket = gameId => this.setState((prevState) => {
+        const nonConferenceGames = []
+        for (const game of prevState.nonConferenceGames) {
+            if (game.id === gameId) {
+                nonConferenceGames.push(
+                    Object.assign(
+                        {},
+                        game,
+                        { assignedPacket: null }
+                    )
+                )
+            } else {
+                nonConferenceGames.push(game)
+            }
+        }
+
+        return {
+            nonConferenceGames,
+            unassignPacketFromNonConferenceGameIds: [...prevState.unassignPacketFromNonConferenceGameIds, gameId],
+            nonConferenceGameMenuElt: null,
+        }
+    })
+
+    startAssignNonConferenceGamePacket = gameId => this.setState({ assigningPacketForNonConferenceGameId: gameId })
+
+    closeAssignNonConferenceGamePacket = () => this.setState({ assigningPacketForNonConferenceGameId: null, nonConferenceGameMenuElt: null })
+
+    assignPacketForNonConferenceGame = (gameId, assignedPacketId) => this.setState((prevState) => {
+        const nonConferenceGames = []
+        for (const game of prevState.nonConferenceGames) {
+            if (game.id === gameId) {
+                nonConferenceGames.push(
+                    Object.assign(
+                        {},
+                        game,
+                        { assignedPacket: prevState.packetsById[assignedPacketId] }
+                    )
+                )
+            } else {
+                nonConferenceGames.push(game)
+            }
+        }
+
+        return {
+            nonConferenceGames,
+            assignPacketForNonConferenceGameIds: [...prevState.assignPacketForNonConferenceGameIds, gameId],
+            nonConferenceGameMenuElt: null,
+            assigningPacketForNonConferenceGameId: null,
+        }
+    })
+
+    renderNonConferenceGames = () => {
+        const { nonConferenceGames, schoolsById, packetsById, nonConferenceGameMenuElt, assigningPacketForNonConferenceGameId } = this.state
 
         if (nonConferenceGames && nonConferenceGames.length > 0) {
             return (
-                <dl>
-                    {nonConferenceGames.map(game => (
-                        <div key={game.id}>
-                            <dt>{game.assignedPacket ? `${game.assignedPacket.name}` : <span className="form-error">Packet TBD</span>}</dt>
-                            <dd>
-                                <ul>
-                                    {game.schoolIds.map(id => <li key={id}>{schoolsById[id].shortName}</li>)}
-                                </ul>
-                            </dd>
-                        </div>
-                    ))}
-                </dl>
+                <>
+                    <dl>
+                        {nonConferenceGames.map(game => (
+                            <div key={game.id}>
+                                <dt>
+                                    {game.assignedPacket ? `${game.assignedPacket.name}` : <span className="form-error">Packet TBD</span>}
+                                    <IconButton id={`non-conference-menu-${game.id}`} size="small" onClick={this.openNonConferenceGameMenu}>
+                                        <MoreVert />
+                                    </IconButton>
+                                    <Menu
+                                        anchorEl={nonConferenceGameMenuElt}
+                                        open={!!nonConferenceGameMenuElt && nonConferenceGameMenuElt.id === `non-conference-menu-${game.id}`}
+                                        onClose={this.closeNonConferenceGameMenu}
+                                    >
+                                        <MenuItem onClick={() => this.removeNonConferenceGame(game.id)}>
+                                            Remove game
+                                        </MenuItem>
+                                        <MenuItem onClick={() => this.startAssignNonConferenceGamePacket(game.id)}>
+                                            {game.assignedPacket ? 'Change packet' : 'Assign packet'}
+                                        </MenuItem>
+                                        <MenuItem onClick={() => this.unassignNonConferenceGamePacket(game.id)} disabled={!game.assignedPacket}>
+                                            Unassign packet
+                                        </MenuItem>
+                                    </Menu>
+                                </dt>
+                                <dd>
+                                    <ul>
+                                        {game.schoolIds.map(id => <li key={id}>{schoolsById[id].shortName}</li>)}
+                                    </ul>
+                                </dd>
+                            </div>
+                        ))}
+                    </dl>
+                    <NonConferenceGamePacket
+                        gameId={assigningPacketForNonConferenceGameId}
+                        packetsById={packetsById}
+                        onCancel={this.closeAssignNonConferenceGamePacket}
+                        onSubmit={(gameId, assignedPacket) => this.assignPacketForNonConferenceGame(gameId, assignedPacket)}
+                    />
+                </>
             )
         } else {
             return <p>This order does not involve non-conference games.</p>
@@ -562,7 +685,7 @@ class BookingImpl extends React.PureComponent {
                 <section id="non-conference">
                     <h2>Non-Conference Games</h2>
 
-                    {this.renderNonConferenceGames(booking.nonConferenceGames)}
+                    {this.renderNonConferenceGames()}
                 </section>
 
                 <section id="practice-material">
