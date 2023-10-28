@@ -41,3 +41,14 @@ export const groupById = (values) => {
     }
     return grouped
 }
+
+export const bySequence = (a, b) => a.sequence - b.sequence
+
+export const byYearCodeAndNumber = (a, b) => {
+    if (a.yearCode === b.yearCode) {
+        return a.number - b.number
+    } else {
+        // Newer first, effectively. I'm not sure this is ideal for all cases, but for current cases it is.
+        return b.yearCode.localeCompare(a.yearCode)
+    }
+}

@@ -4,14 +4,8 @@ import PropTypes from 'prop-types'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormLabel, IconButton, MenuItem, Select, TextField, Tooltip } from '@mui/material'
 import { Close, Edit } from '@mui/icons-material'
 
-const byYearCodeAndNumber = (a, b) => {
-    if (a.yearCode === b.yearCode) {
-        return a.number - b.number
-    } else {
-        // Newer first, effectively. I'm not sure this is ideal for all cases, but for the dropdown it is.
-        return b.yearCode.localeCompare(a.yearCode)
-    }
-}
+import { byYearCodeAndNumber } from '../util/util'
+
 
 const BookingConferencePackets = (props) => {
     const { conference, packetsById, onSubmit } = props

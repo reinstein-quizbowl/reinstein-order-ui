@@ -13,7 +13,7 @@ import BookingConferenceSchools from './BookingConferenceSchools'
 import Api from '../api/Api'
 import InvoiceLinesTable from '../invoice/InvoiceLinesTable'
 import { ALL_STATUSES, AUTHORITIES } from '../util/bookingUtil'
-import { SENTINEL_NULL_DATE, formatMoney, groupById, setStatePromise } from '../util/util'
+import { SENTINEL_NULL_DATE, formatMoney, groupById, setStatePromise, bySequence, byYearCodeAndNumber } from '../util/util'
 import SimpleDisplayOrEditDialog from '../util-components/SimpleDisplayOrEditDialog'
 import Loading from '../util-components/Loading'
 import LoadingOverlay from '../util-components/LoadingOverlay'
@@ -35,8 +35,10 @@ class BookingImpl extends React.PureComponent {
 
         this.state = {
             booking: null,
-            packetsById: null,
             schoolsById: null,
+            packetsById: null,
+            stateSeriesById: null,
+            compilationsById: null,
 
             schoolId: null,
             name: '',
@@ -49,6 +51,11 @@ class BookingImpl extends React.PureComponent {
 
             conference: null,
 
+            practiceStateSeriesIds: null,
+            practicePacketIds: null,
+            practiceCompilationIds: null,
+            modifiedPracticeMaterial: false,
+
             confirmingDelete: false,
             showError: false,
             saving: false,
@@ -57,8 +64,10 @@ class BookingImpl extends React.PureComponent {
 
     componentDidMount() {
         this.loadBooking()
-        this.loadPackets()
         this.loadSchools()
+        this.loadPackets()
+        this.loadStateSeries()
+        this.loadCompilations()
         document.title = 'Edit Order \u2013 Reinstein QuizBowl'
     }
 
@@ -77,7 +86,15 @@ class BookingImpl extends React.PureComponent {
             paymentReceivedDate: booking.paymentReceivedDate ? dayjs(booking.paymentReceivedDate) : null,
             internalNote: booking.internalNote || '',
             conference: booking.conference,
+            practiceStateSeriesIds: booking.stateSeriesOrders.map(it => it.stateSeries.id),
+            practicePacketIds: booking.packetOrders.map(it => it.packet.id),
+            practiceCompilationIds: booking.compilationOrders.map(it => it.compilation.id),
         })
+    }
+
+    loadSchools = async () => {
+        const schools = await Api.get('/schools')
+        this.setState({ schoolsById: groupById(schools) })
     }
 
     loadPackets = async () => {
@@ -85,9 +102,14 @@ class BookingImpl extends React.PureComponent {
         this.setState({ packetsById: groupById(packets) })
     }
 
-    loadSchools = async () => {
-        const schools = await Api.get('/schools')
-        this.setState({ schoolsById: groupById(schools) })
+    loadStateSeries = async () => {
+        const stateSeries = await Api.get('/stateSeries')
+        this.setState({ stateSeriesById: groupById(stateSeries) })
+    }
+
+    loadCompilations = async () => {
+        const compilations = await Api.get('/compilations')
+        this.setState({ compilationsById: groupById(compilations) })
     }
 
     startConfirmDelete = () => this.setState({ confirmingDelete: true })
@@ -104,6 +126,7 @@ class BookingImpl extends React.PureComponent {
             booking, schoolsById,
             schoolId, name, emailAddress, authority, statusCode, shipDate, paymentReceivedDate, internalNote,
             conference,
+            practiceStateSeriesIds, practicePacketIds, practiceCompilationIds, modifiedPracticeMaterial,
         } = this.state
         
         const error = this.determineError()
@@ -131,7 +154,17 @@ class BookingImpl extends React.PureComponent {
                 updated = await Api.post(`/bookings/${booking.creationId}/conference`, conference)
             }
 
-            await setStatePromise(this, { booking: updated, saving: false })
+            if (modifiedPracticeMaterial) {
+                const promises = [
+                    Api.post(`/bookings/${booking.creationId}/stateSeries`, practiceStateSeriesIds, onError),
+                    Api.post(`/bookings/${booking.creationId}/practicePackets`, practicePacketIds, onError),
+                    Api.post(`/bookings/${booking.creationId}/practiceCompilations`, practiceCompilationIds, onError),
+                ]
+                await Promise.all(promises)
+                updated = await Api.get(`/bookings/${booking.creationId}`)
+            }
+
+            await setStatePromise(this, { booking: updated, saving: false, modifiedPracticeMaterial: false })
         }
     }
 
@@ -247,46 +280,40 @@ class BookingImpl extends React.PureComponent {
         }
     }
 
-    renderPracticeMaterial = (stateSeriesOrders, packetOrders, compilationOrders) => {
-        if (stateSeriesOrders.length > 0 || packetOrders.length > 0 || compilationOrders.length > 0) {
+    renderPracticeMaterial = () => {
+        const { packetsById, stateSeriesById, compilationsById, practiceStateSeriesIds, practicePacketIds, practiceCompilationIds } = this.state
+
+        if (practiceStateSeriesIds.length > 0 || practicePacketIds.length > 0 || practiceCompilationIds.length > 0) {
+            const practiceStateSeries = practiceStateSeriesIds.map(id => stateSeriesById[id]).sort(bySequence)
+            const practicePackets = practicePacketIds.map(id => packetsById[id]).sort(byYearCodeAndNumber)
+            const practiceCompilations = practiceCompilationIds.map(id => compilationsById[id]).sort(bySequence)
+
             return (
-                <dl>
-                    {stateSeriesOrders.length > 0 && (
-                        <div>
-                            <dt>State Series</dt>
-                            <dd>
-                                <ul>
-                                    {stateSeriesOrders.map(ss => <li key={`ss-${ss.id}`}>{ss.stateSeries.name}</li>)}
-                                </ul>
-                            </dd>
-                        </div>
-                    )}
-                    {packetOrders.length > 0 && (
-                        <div>
-                            <dt>Regular-Season Packets</dt>
-                            <dd>
-                                <ul>
-                                    {packetOrders.map(p => <li key={`p-${p.id}`}>{p.packet.name}</li>)}
-                                </ul>
-                            </dd>
-                        </div>
-                    )}
-                    {packetOrders.length > 0 && (
-                        <div>
-                            <dt>Regular-Season Packets</dt>
-                            <dd>
-                                <ul>
-                                    {compilationOrders.map(c => <li key={`c-${c.id}`}>{c.compilation.name}</li>)}
-                                </ul>
-                            </dd>
-                        </div>
-                    )}
-                </dl>
+                <ul>
+                    {practiceStateSeries.map(it => <li key={`ss-${it.id}`}>{it.name} {this.renderPracticeMaterialDeleteButton('practiceStateSeriesIds', it.id)}</li>)}
+                    {practicePackets.map(it => <li key={`p-${it.id}`}>{it.name} {this.renderPracticeMaterialDeleteButton('practicePacketIds', it.id)}</li>)}
+                    {practiceCompilations.map(it => <li key={`c-${it.id}`}>{it.name} compilation {this.renderPracticeMaterialDeleteButton('practiceCompilationIds', it.id)}</li>)}
+                </ul>
             )
         } else {
             return <p>This order does not involve practice material.</p>
         }
     }
+
+    renderPracticeMaterialDeleteButton = (stateKey, id) => {
+        return (
+            <Tooltip title="Remove item">
+                <IconButton size="small" onClick={() => this.removePracticeMaterialItem(stateKey, id)}>
+                    <Close />
+                </IconButton>
+            </Tooltip>
+        )
+    }
+
+    removePracticeMaterialItem = (stateKey, id) => this.setState(prevState => ({
+        [stateKey]: prevState[stateKey].filter(it => it !== id),
+        modifiedPracticeMaterial: true,
+    }))
 
     render() {
         const {
@@ -294,9 +321,9 @@ class BookingImpl extends React.PureComponent {
             schoolId, name, emailAddress, authority, statusCode, shipDate, paymentReceivedDate, internalNote,
             conference,
             confirmingDelete, showError, saving,
-            packetsById, schoolsById,
+            schoolsById, packetsById, stateSeriesById, compilationsById,
         } = this.state
-        if (!booking || !packetsById || !schoolsById) return <Loading />
+        if (!booking || !schoolsById || !packetsById || !stateSeriesById || !compilationsById) return <Loading />
 
         const basicData = [
             { key: 'ID (internal)', value: booking.creationId },
@@ -478,7 +505,7 @@ class BookingImpl extends React.PureComponent {
                 <section id="practice-material">
                     <h2>Practice Material</h2>
 
-                    {this.renderPracticeMaterial(booking.stateSeriesOrders, booking.packetOrders, booking.compilationOrders)}
+                    {this.renderPracticeMaterial()}
                 </section>
 
                 {showError && <p className="form-error">{error}</p>}
