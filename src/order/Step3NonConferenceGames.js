@@ -34,7 +34,7 @@ export default class Step3NonConferenceGames extends AbstractStep {
 
     handleAddGame =  newGame => this.setState(prevState => ({ nonConferenceGames: [...prevState.nonConferenceGames, newGame] }))
 
-    handleDeleteGame = async deleteIndex => {
+    handleDeleteGame = async (deleteIndex) => {
         const { data, onError } = this.props
 
         const game = this.state.nonConferenceGames[deleteIndex]
