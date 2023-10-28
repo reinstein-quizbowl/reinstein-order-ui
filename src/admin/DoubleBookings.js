@@ -70,12 +70,12 @@ class DoubleBookingsImpl extends React.PureComponent {
 
         const exposedSchool = schoolsById[exposure.exposedSchoolId]
         const packet = packetsById[exposure.packetId]
-        const ordererSchool = schoolsById[exposure.ordererSchoolId]
+        const ordererSchool = exposure.ordererSchoolId ? schoolsById[exposure.ordererSchoolId] : null
 
         return (
             <li key={`${exposedSchool.id}-${packet.id}-${exposure.sourceId}`}>
                 {exposedSchool.shortName} is booked to hear {packet.name} at {exposure.source} (ID {exposure.sourceId}){' '}
-                <Link to={`/admin/order/${exposure.bookingCreationId}`}>(order placed by {ordererSchool.shortName})</Link>
+                <Link to={`/admin/order/${exposure.bookingCreationId}`}>(order placed by {ordererSchool ? ordererSchool.shortName : 'unknown'})</Link>
             </li>
         )
     }
