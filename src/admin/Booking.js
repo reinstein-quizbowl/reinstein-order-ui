@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useErrorBoundary } from 'react-error-boundary'
 import dayjs from 'dayjs'
 
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Select, TextField, Tooltip } from '@mui/material'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, ListSubheader, Menu, MenuItem, Select, TextField, Tooltip } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { Add, Calculate, Close, Print } from '@mui/icons-material'
 import validator from 'validator'
@@ -54,6 +54,7 @@ class BookingImpl extends React.PureComponent {
             practiceStateSeriesIds: null,
             practicePacketIds: null,
             practiceCompilationIds: null,
+            addingPracticeMaterialElt: null,
             modifiedPracticeMaterial: false,
 
             confirmingDelete: false,
@@ -110,6 +111,63 @@ class BookingImpl extends React.PureComponent {
     loadCompilations = async () => {
         const compilations = await Api.get('/compilations')
         this.setState({ compilationsById: groupById(compilations) })
+    }
+
+    startAddPracticeMaterial = e => this.setState({ addingPracticeMaterialElt: e.currentTarget })
+
+    closeAddPracticeMaterial = () => this.setState({ addingPracticeMaterialElt: null })
+
+    renderPracticeMaterialAddMenu = () => {
+        const { addingPracticeMaterialElt } = this.state
+
+        const { stateSeriesById, packetsById, compilationsById, practiceStateSeriesIds, practicePacketIds, practiceCompilationIds } = this.state
+
+        const stateSeries = Object.values(stateSeriesById).sort(bySequence)
+        const packets = Object.values(packetsById).sort(byYearCodeAndNumber)
+        const compilations = Object.values(compilationsById).sort(bySequence)
+
+        return (
+            <Menu
+                anchorEl={addingPracticeMaterialElt}
+                open={!!addingPracticeMaterialElt}
+                onChange={this.addPracticeMaterialItem}
+                onClose={this.closeAddPracticeMaterial}
+                slotProps={{ paper: { style: { maxHeight: 500 } } }}
+            >
+                <ListSubheader>State Series</ListSubheader>
+                {stateSeries.map(ss => (
+                    <MenuItem
+                        key={`ss-${ss.id}`}
+                        onClick={() => this.addPracticeMaterialItem('practiceStateSeriesIds', ss.id)}
+                        disabled={practiceStateSeriesIds.includes(ss.id)}
+                    >
+                        {ss.name}
+                    </MenuItem>
+                ))}
+
+                <ListSubheader>Regular-Season Packets</ListSubheader>
+                {packets.map(p => (
+                    <MenuItem
+                        key={`p-${p.id}`}
+                        onClick={() => this.addPracticeMaterialItem('practicePacketIds', p.id)}
+                        disabled={practicePacketIds.includes(p.id)}
+                    >
+                        {p.name}
+                    </MenuItem>
+                ))}
+
+                <ListSubheader>Compilations</ListSubheader>
+                {compilations.map(c => (
+                    <MenuItem
+                        key={`c-${c.id}`}
+                        onClick={() => this.addPracticeMaterialItem('practiceCompilationIds', c.id)}
+                        disabled={practiceCompilationIds.includes(c.id)}
+                    >
+                        {c.name}
+                    </MenuItem>
+                ))}
+            </Menu>
+        )
     }
 
     startConfirmDelete = () => this.setState({ confirmingDelete: true })
@@ -310,6 +368,11 @@ class BookingImpl extends React.PureComponent {
         )
     }
 
+    addPracticeMaterialItem = (stateKey, id) => this.setState(prevState => ({
+        [stateKey]: [...prevState[stateKey], id],
+        modifiedPracticeMaterial: true,
+    }))
+
     removePracticeMaterialItem = (stateKey, id) => this.setState(prevState => ({
         [stateKey]: prevState[stateKey].filter(it => it !== id),
         modifiedPracticeMaterial: true,
@@ -503,7 +566,16 @@ class BookingImpl extends React.PureComponent {
                 </section>
 
                 <section id="practice-material">
-                    <h2>Practice Material</h2>
+                    <div className="display-or-edit-container-outer">
+                        <h2 className="display-or-edit-container-inner">Practice Material</h2>
+
+                        <Tooltip title="Add practice material">
+                            <IconButton id="add-practice-material" size="small" onClick={this.startAddPracticeMaterial}>
+                                <Add />
+                            </IconButton>
+                        </Tooltip>
+                        {this.renderPracticeMaterialAddMenu()}
+                    </div>
 
                     {this.renderPracticeMaterial()}
                 </section>
