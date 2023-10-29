@@ -16,8 +16,7 @@ export default class NonConferenceGameInput extends React.PureComponent {
     static propTypes = {
         open: PropTypes.bool.isRequired,
         schools: PropTypes.array.isRequired, // Array<ApiSchool> to act as choices
-        year: PropTypes.object.isRequired, // ApiYear
-        baseSchool: PropTypes.object.isRequired, // ApiSchool to act as distance from which `schools`' distance is measured and to act as a default selection
+        baseSchool: PropTypes.object, // ApiSchool to act as distance from which `schools`' distance is measured and to act as a default selection
         onClose: PropTypes.func.isRequired,
         onSubmit: PropTypes.func.isRequired,
     }
@@ -70,7 +69,7 @@ export default class NonConferenceGameInput extends React.PureComponent {
         const { baseSchool } = this.props
         const { school1Id, school2Id, school3Id } = this.state
 
-        if (![school1Id, school2Id, school3Id].includes(baseSchool.id)) {
+        if (baseSchool && ![school1Id, school2Id, school3Id].includes(baseSchool.id)) {
             return <p className="form-warning">You have indicated that your own team won&rsquo;t be hearing the questions for this game. Make sure that&rsquo;s actually true; it&rsquo;s critical for question security!</p>
         }
     }

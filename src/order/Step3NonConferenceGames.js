@@ -133,7 +133,7 @@ export default class Step3NonConferenceGames extends AbstractStep {
     renderSchoolShortNames = schoolIds => makeEnglishList(schoolIds.map(schoolId => this.props.schoolsById[schoolId].shortName))
 
     renderBody = () => {
-        const { data, packets, schoolsById, year } = this.props
+        const { data, packets, schoolsById } = this.props
         const { orderNonConferenceGames, nonConferenceGames, adding, showError } = this.state
 
         const error = this.determineError()
@@ -177,7 +177,6 @@ export default class Step3NonConferenceGames extends AbstractStep {
                         <NonConferenceGameInput
                             open={adding}
                             schools={Object.values(schoolsById).filter(it => it.active)}
-                            year={year}
                             baseSchool={data.school}
                             onClose={this.closeAddingGame}
                             onSubmit={this.handleAddGame}
