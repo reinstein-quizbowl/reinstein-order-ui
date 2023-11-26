@@ -154,7 +154,7 @@ export default class Step6Confirm extends AbstractStep {
                 {invoiceLines && (
                     <section className="order-review invoice-wrapper">
                         <h2>Invoice Preview</h2>
-                        <InvoiceLinesTable lines={invoiceLines} />
+                        <InvoiceLinesTable lines={invoiceLines} bookingCreationId={data.creationId} />
                     </section>
                 )}
 

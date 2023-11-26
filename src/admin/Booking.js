@@ -20,6 +20,7 @@ import SimpleDisplayOrEditDialog from '../util-components/SimpleDisplayOrEditDia
 import Loading from '../util-components/Loading'
 import LoadingOverlay from '../util-components/LoadingOverlay'
 import SchoolPicker from '../util-components/SchoolPicker'
+import InvoiceLineEdit from '../invoice/InvoiceLineEdit'
 
 const Booking = (props) => {
     const params = useParams()
@@ -65,6 +66,8 @@ class BookingImpl extends React.PureComponent {
             practiceCompilationIds: null,
             addingPracticeMaterialElt: null,
             modifiedPracticeMaterial: false,
+
+            addingInvoiceLine: false,
 
             confirmingDelete: false,
             showError: false,
@@ -298,6 +301,10 @@ class BookingImpl extends React.PureComponent {
 
         await setStatePromise(this, { booking: updated, saving: false })
     }
+
+    startAddInvoiceLine = () => this.setState({ addingInvoiceLine: true })
+
+    closeAddInvoiceLine = () => this.setState({ addingInvoiceLine: false })
 
     resendConfirmation = async () => {
         const { booking } = this.state
@@ -537,6 +544,7 @@ class BookingImpl extends React.PureComponent {
             conference,
             addingNonConferenceGame,
             confirmingDelete, showError, saving,
+            addingInvoiceLine,
             schoolsById, packetsById, stateSeriesById, compilationsById,
         } = this.state
         if (!booking || !schoolsById || !packetsById || !stateSeriesById || !compilationsById) return <Loading />
@@ -791,6 +799,20 @@ class BookingImpl extends React.PureComponent {
                                 <Calculate />
                             </IconButton>
                         </Tooltip>
+
+                        <Tooltip title="Add an item manually">
+                            <IconButton onClick={this.startAddInvoiceLine}>
+                                <Add />
+                            </IconButton>
+                        </Tooltip>
+                        <InvoiceLineEdit
+                            line={null}
+                            bookingCreationId={booking.creationId}
+                            open={addingInvoiceLine}
+                            onClose={this.closeAddInvoiceLine}
+                            onSubmit={this.loadBooking}
+                        />
+
                         {booking.invoiceLines && booking.invoiceLines.length > 0 && (
                             <Tooltip title="View printable invoice">
                                 <IconButton component={Link} to={`/order/${booking.creationId}/invoice`}>
@@ -802,7 +824,14 @@ class BookingImpl extends React.PureComponent {
                 </div>
 
                     {booking.invoiceLines && booking.invoiceLines.length > 0 ?
-                        <InvoiceLinesTable lines={booking.invoiceLines} /> :
+                        (
+                            <InvoiceLinesTable
+                                lines={booking.invoiceLines}
+                                bookingCreationId={booking.creationId}
+                                allowEditing
+                                onChange={this.loadBooking}
+                            />
+                        ) :
                         <p className="form-error">None</p>
                     }
                 </section>

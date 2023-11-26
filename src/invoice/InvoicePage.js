@@ -63,7 +63,7 @@ class InvoicePageImpl extends React.PureComponent {
                     <strong>Date:</strong> {dayjs(booking.createdAt).format('dddd, MMMM D, YYYY')}
                 </p>
 
-                <InvoiceLinesTable lines={booking.invoiceLines} />
+                <InvoiceLinesTable lines={booking.invoiceLines} bookingCreationId={booking.creationId} />
 
                 <p>Please send a check made out to <strong>Reinstein QuizBowl</strong> to&hellip;</p>
                 

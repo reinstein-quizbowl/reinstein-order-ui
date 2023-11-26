@@ -3,18 +3,9 @@ import PropTypes from 'prop-types'
 
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableRow } from '@mui/material'
 
+import InvoiceLine from './InvoiceLine'
 import { formatMoney } from '../util/util'
 import Loading from '../util-components/Loading'
-
-const renderLine = line => (
-    <TableRow key={line.id || line.label}>{/* line.id is null for the synthetic items used in previewing */}
-        <TableCell variant="head" component="th">
-            {line.label}
-            {Number(line.quantity) > 1 && ` (${line.quantity} @ ${formatMoney(line.unitCost)} each)`}
-        </TableCell>
-        <TableCell align="right">{formatMoney(Number(line.quantity) * Number(line.unitCost), true)}</TableCell>
-    </TableRow>
-)
 
 const calculateTotal = (lines) => {
     // There's some clever way to do this with a reduce function, but I find it hard to read
@@ -26,7 +17,7 @@ const calculateTotal = (lines) => {
     return total
 }
 
-const InvoiceLinesTable = ({ lines }) => {
+const InvoiceLinesTable = ({ lines, bookingCreationId, allowEditing, onChange }) => {
     if (!lines) {
         return <Loading />
     } else if (lines.length === 0) {
@@ -38,15 +29,25 @@ const InvoiceLinesTable = ({ lines }) => {
                     <TableRow>
                         <TableCell>Item</TableCell>
                         <TableCell align="right">Price</TableCell>
+                        {allowEditing && <TableCell>Action</TableCell>}
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {lines.map(renderLine)}
+                    {lines.map(line => (
+                        <InvoiceLine
+                            key={line.id || line.label /* line.id is null for the synthetic items used in previewing */}
+                            line={line}
+                            bookingCreationId={bookingCreationId}
+                            allowEditing={allowEditing}
+                            onChange={onChange}
+                        />
+                    ))}
                 </TableBody>
                 <TableFooter>
                     <TableRow>
                         <TableCell variant="head" component="th">Total</TableCell>
                         <TableCell align="right">{formatMoney(calculateTotal(lines), true)}</TableCell>
+                        {allowEditing && <TableCell />}
                     </TableRow>
                 </TableFooter>
             </Table>
@@ -56,6 +57,9 @@ const InvoiceLinesTable = ({ lines }) => {
 
 InvoiceLinesTable.propTypes = {
     lines: PropTypes.array, // Array<ApiInvoiceLine>. required to actually render anything meaningful
+    bookingCreationId: PropTypes.string.isRequired,
+    allowEditing: PropTypes.bool,
+    onChange: PropTypes.func,
 }
 
 export default InvoiceLinesTable
