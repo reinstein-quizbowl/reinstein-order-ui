@@ -92,6 +92,7 @@ const InvoiceLineEdit = (props) => {
                                 options={ITEM_TYPE_OPTIONS}
                                 required
                                 value={itemType || ''}
+                                onChange={(_, value) => setItemType(value)}
                                 renderInput={(params) => <TextField {...params} onChange={e => setItemType(e.target.value)} />}
                                 fullWidth
                             />
