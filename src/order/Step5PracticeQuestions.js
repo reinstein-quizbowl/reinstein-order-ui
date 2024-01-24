@@ -64,7 +64,7 @@ export default class Step5PracticeQuestions extends AbstractStep {
 
         if (this.state.stateSeries) return
 
-        const stateSeries = await Api.get(`/stateSeries`, onError)
+        const stateSeries = await Api.get(`/stateSeries?filter=available`, onError)
         this.setState({ stateSeries })
     }
 
@@ -92,7 +92,7 @@ export default class Step5PracticeQuestions extends AbstractStep {
 
         if (this.state.compilations) return
 
-        const compilations = await Api.get(`/compilations`, onError)
+        const compilations = await Api.get(`/compilations?filter=available`, onError)
         this.setState({ compilations })
     }
 

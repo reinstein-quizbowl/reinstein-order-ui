@@ -116,17 +116,17 @@ class BookingImpl extends React.PureComponent {
     }
 
     loadPackets = async () => {
-        const packets = await Api.get('/packets')
+        const packets = await Api.get('/packets?filter=all')
         this.setState({ packetsById: groupById(packets) })
     }
 
     loadStateSeries = async () => {
-        const stateSeries = await Api.get('/stateSeries')
+        const stateSeries = await Api.get('/stateSeries?filter=all')
         this.setState({ stateSeriesById: groupById(stateSeries) })
     }
 
     loadCompilations = async () => {
-        const compilations = await Api.get('/compilations')
+        const compilations = await Api.get('/compilations?filter=all')
         this.setState({ compilationsById: groupById(compilations) })
     }
 
