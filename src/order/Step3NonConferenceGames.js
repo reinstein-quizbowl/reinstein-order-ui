@@ -160,7 +160,7 @@ export default class Step3NonConferenceGames extends AbstractStep {
                     </FormControl>
                 </div>
 
-                <p>Each packet (i.e., each game) costs $15.</p>
+                <p>Each packet (i.e., each game) costs $20.</p>
 
                 {orderNonConferenceGames && (
                     <>

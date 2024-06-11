@@ -138,9 +138,8 @@ export default class Step2Conference extends AbstractStep {
         switch (schoolsListed) {
             case 1:
             case 2:
-                return 'The cost per packet is $15 if there are exactly three schools in your conference, $20 if there are exactly four, $25 if there are exactly five, and $30 if there are six or more.'
             case 3:
-                return 'If there are exactly three schools in your conference, each packet costs $15. The cost will change if there are more schools in your conference.'
+                return 'The cost per packet is $20 if there are exactly three or four schools in your conference, $25 if there are exactly five, and $30 if there are six or more.'
             case 4:
                 return 'If there are exactly four schools in your conference, each packet costs $20. The cost will change if there are more schools in your conference.'
             case 5:
