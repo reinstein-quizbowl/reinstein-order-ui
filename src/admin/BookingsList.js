@@ -2,7 +2,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 
-import { Button, Checkbox, FormControl, FormControlLabel, FormLabel, FormGroup, Table, TableBody, TableCell, TableHead, TableRow, TableSortLabel, TextField } from '@mui/material'
+import { Button, Checkbox, FormControl, FormControlLabel, FormLabel, FormGroup, MenuItem, Select, Table, TableBody, TableCell, TableHead, TableRow, TableSortLabel, TextField } from '@mui/material'
 
 import Api from '../api/Api'
 import Auth from '../auth/Auth'
@@ -24,6 +24,8 @@ const HEADERS = [
     { code: 'status', label: 'Status' },
 ]
 
+const ALL_YEARS = 'all'
+
 const BookingsList = (props) => {
     const navigate = useNavigate()
 
@@ -37,21 +39,32 @@ class BookingsListImpl extends React.PureComponent {
         super(props)
 
         this.state = {
-            statusCodes: [STATUS_SUBMITTED.code, STATUS_APPROVED.code],
-            includePaid: true,
-            includeUnpaid: true,
+            years: null,
             bookings: null,
             schoolsById: null,
+            selectedYearCode: ALL_YEARS,
+            selectedStatusCodes: [STATUS_SUBMITTED.code, STATUS_APPROVED.code],
+            includePaid: true,
+            includeUnpaid: true,
             sortBy: null,
             sortDirection: 'asc',
         }
     }
 
     componentDidMount() {
+        this.loadYears()
         this.loadSchools()
-        this.loadBookings()
 
         document.title = 'Orders \u2013 Reinstein QuizBowl'
+    }
+
+    loadYears = async () => {
+        const years = await Api.get('/years')
+        const yearsSorted = years.sort((a, b) => b.code.localeCompare(a.code)) // newest first
+        this.setState({
+            years: yearsSorted,
+            selectedYearCode: yearsSorted[0].code, // most recent
+        }, this.loadBookings)
     }
 
     loadSchools = async () => {
@@ -60,13 +73,17 @@ class BookingsListImpl extends React.PureComponent {
     }
 
     loadBookings = async () => {
-        const { statusCodes, includePaid, includeUnpaid } = this.state
+        const { selectedYearCode, selectedStatusCodes, includePaid, includeUnpaid } = this.state
 
-        const statusCodesParam = statusCodes.map(it => 'statusCode=' + it).join('&')
+        let params = selectedStatusCodes.map(it => 'statusCode=' + it).join('&')
+
+        if (selectedYearCode && selectedYearCode !== ALL_YEARS) {
+            params += '&yearCode=' + selectedYearCode
+        }
 
         await setStatePromise(this, { bookings: null })
 
-        let bookings = await Api.get('/bookings?' + statusCodesParam)
+        let bookings = await Api.get('/bookings?' + params)
 
         if (!includePaid) {
             bookings = bookings.filter(it => !it.paymentReceivedDate)
@@ -81,11 +98,11 @@ class BookingsListImpl extends React.PureComponent {
     toggleStateMember = key => this.setState(prevState => ({ [key]: !prevState[key] }))
 
     toggleStatus = statusCode => this.setState((prevState) => {
-        const old = prevState.statusCodes
+        const old = prevState.selectedStatusCodes
         if (old.includes(statusCode)) {
-            return { statusCodes: old.filter(it => it !== statusCode) }
+            return { selectedStatusCodes: old.filter(it => it !== statusCode) }
         } else {
-            return { statusCodes: [statusCode, ...old] }
+            return { selectedStatusCodes: [statusCode, ...old] }
         }
     })
 
@@ -177,36 +194,67 @@ class BookingsListImpl extends React.PureComponent {
         }
     })
 
-    renderStatusPicker = () => (
-        <fieldset>
-            <FormGroup row>
-                {ALL_STATUSES.map(this.renderStatusOption)}
-            </FormGroup>
-            <FormGroup row>
-                <FormControlLabel
-                    label="Include paid orders"
-                    control={<Checkbox checked={this.state.includePaid} onChange={() => this.toggleStateMember('includePaid')} />}
-                    classes={{ root: 'filter-option' }}
-                />
-                <FormControlLabel
-                    label="Include unpaid orders"
-                    control={<Checkbox checked={this.state.includeUnpaid} onChange={() => this.toggleStateMember('includeUnpaid')} />}
-                    classes={{ root: 'filter-option' }}
-                />
-            </FormGroup>
-            <div>{/* prevents the <Button> from growing weirdly tall */}
-                <Button onClick={this.loadBookings} variant="outlined">
-                    Update Listing
-                </Button>
-            </div>
-        </fieldset>
-    )
+    renderFilter = () => {
+        const { years, selectedYearCode, includePaid, includeUnpaid } = this.state
+
+        if (!years) return
+
+        return (
+            <fieldset>
+                <FormGroup row>
+                    <FormControl fullWidth style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+                        <FormLabel id="selectedYearCodeLabel" htmlFor="selectedYearCode" required style={{ marginRight: '1rem', fontWeight: 'normal' }}>
+                            Year
+                        </FormLabel>
+                        <Select
+                            aria-labelledby="selectedYearCodeLabel"
+                            id="selectedYearCode"
+                            name="selectedYearCode"
+                            value={selectedYearCode || ''}
+                            onChange={e => this.setState({ selectedYearCode: e.target.value })}
+                            size="small"
+                            style={{ minWidth: '10rem' }}
+                        >
+                            <MenuItem value={ALL_YEARS}>
+                                All years
+                            </MenuItem>
+                            {years.map(year =>
+                                <MenuItem key={year.code} value={year.code}>
+                                    {year.name}
+                                </MenuItem>
+                            )}
+                        </Select>
+                    </FormControl>
+                </FormGroup>
+                <FormGroup row>
+                    {ALL_STATUSES.map(this.renderStatusOption)}
+                </FormGroup>
+                <FormGroup row>
+                    <FormControlLabel
+                        label="Include paid orders"
+                        control={<Checkbox checked={includePaid} onChange={() => this.toggleStateMember('includePaid')} />}
+                        classes={{ root: 'filter-option' }}
+                    />
+                    <FormControlLabel
+                        label="Include unpaid orders"
+                        control={<Checkbox checked={includeUnpaid} onChange={() => this.toggleStateMember('includeUnpaid')} />}
+                        classes={{ root: 'filter-option' }}
+                    />
+                </FormGroup>
+                <div>{/* prevents the <Button> from growing weirdly tall */}
+                    <Button onClick={this.loadBookings} variant="outlined">
+                        Update Listing
+                    </Button>
+                </div>
+            </fieldset>
+        )
+    }
 
     renderStatusOption = status => (
         <FormControlLabel
             key={status.code}
             label={status.label}
-            control={<Checkbox checked={this.state.statusCodes.includes(status.code)} onChange={() => this.toggleStatus(status.code)} />}
+            control={<Checkbox checked={this.state.selectedStatusCodes.includes(status.code)} onChange={() => this.toggleStatus(status.code)} />}
             classes={{ root: 'filter-option' }}
         />
     )
@@ -214,9 +262,9 @@ class BookingsListImpl extends React.PureComponent {
     renderBookingRow = booking => <BookingSummaryRow key={booking.id} booking={booking} schoolsById={this.state.schoolsById} />
 
     renderBookings = () => {
-        const { bookings, schoolsById, statusCodes, sortBy, sortDirection } = this.state
+        const { bookings, schoolsById, sortBy, sortDirection } = this.state
         if (!bookings || !schoolsById) return null
-        if (bookings.length === 0) return <p>No results for {statusCodes.length === 1 ? 'this status' : 'these statuses' }.</p>
+        if (bookings.length === 0) return <p>No results for the filter you have chosen.</p>
 
         return (
             <Table className="invoice">
@@ -269,12 +317,12 @@ class BookingsListImpl extends React.PureComponent {
     }
 
     render() {
-        const { schoolsById, bookings } = this.state
+        const { years, schoolsById, bookings } = this.state
 
         return (
             <div>
-                {(!schoolsById || !bookings) && <LoadingOverlay />}
-                {this.renderStatusPicker()}
+                {(!years || !schoolsById || !bookings) && <LoadingOverlay />}
+                {this.renderFilter()}
                 <DoubleBookings />
                 {this.renderBookings()}
                 {this.renderEmailAddresses()}
