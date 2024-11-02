@@ -29,7 +29,8 @@
   "overrides": {
     "react-scripts": {
       "postcss": ">=8.4.31",
-      "nth-check": ">=2.0.2"
+      "nth-check": ">=2.0.2",
+      "ws": ">=7.5.10"
     }
   },
   "scripts": {
