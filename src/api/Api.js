@@ -16,7 +16,7 @@ const _getAuthHeader = () => {
 const Api = {
     get: async (path, onError) => {
         try {
-            const response = await fetch(process.env.REACT_APP_API_BASE + path, {
+            const response = await fetch(import.meta.env.VITE_APP_API_BASE + path, {
                 method: 'GET',
                 headers: _getAuthHeader(),
             })
@@ -44,7 +44,7 @@ const Api = {
 
     post: async (path, body, onError) => {
         try {
-            const response = await fetch(process.env.REACT_APP_API_BASE + path, {
+            const response = await fetch(import.meta.env.VITE_APP_API_BASE + path, {
                 method: 'POST',
                 mode: 'cors',
                 cache: 'no-cache',
@@ -75,7 +75,7 @@ const Api = {
 
     patch: async (path, body, onError) => {
         try {
-            const response = await fetch(process.env.REACT_APP_API_BASE + path, {
+            const response = await fetch(import.meta.env.VITE_APP_API_BASE + path, {
                 method: 'PATCH',
                 mode: 'cors',
                 cache: 'no-cache',
@@ -106,7 +106,7 @@ const Api = {
 
     delete: async (path, onError) => {
         try {
-            const response = await fetch(process.env.REACT_APP_API_BASE + path, {
+            const response = await fetch(import.meta.env.VITE_APP_API_BASE + path, {
                 method: 'DELETE',
                 mode: 'cors',
                 cache: 'no-cache',
