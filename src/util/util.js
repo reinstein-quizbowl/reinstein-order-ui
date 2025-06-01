@@ -1,4 +1,4 @@
-export const setStatePromise = (component, newState) => new Promise(resolve => component.setState(newState, resolve));
+export const setStatePromise = (component, newState) => new Promise(resolve => component.setState(newState, resolve))
 
 export const SENTINEL_NULL_DATE = '1900-01-01'
 
