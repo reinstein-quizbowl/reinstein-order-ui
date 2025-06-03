@@ -324,7 +324,7 @@ export default class Step5PracticeQuestions extends AbstractStep {
                     <FormGroup>
                         {compilations.map(this.renderCompilationCheckbox)}
                     </FormGroup>
-                    <p>These some of the same questions as are in the regular-season and/or State Series sets, organized by category.</p>
+                    <p>These are some of the same questions as are in the regular-season and/or State Series sets, organized by category.</p>
                 </FormControl>
             </section>
         )
