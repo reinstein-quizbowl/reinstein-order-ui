@@ -119,7 +119,7 @@ export default class Step6Confirm extends AbstractStep {
     )
 
     renderBody = () => {
-        const { data } = this.props
+        const { data, practiceOnly } = this.props
         const { invoiceLines, externalNote, requestsW9, showError } = this.state
 
         if (!data) return null
@@ -139,15 +139,19 @@ export default class Step6Confirm extends AbstractStep {
                     </ul>
                 </section>
 
-                <section className="order-review">
-                    <h2>{data.conference ? data.conference.name : 'Conference'} {this.renderGoToStepButton(2)}</h2>
-                    {this.renderConference(data.conference)}
-                </section>
+                {!practiceOnly && (
+                    <section className="order-review">
+                        <h2>{data.conference ? data.conference.name : 'Conference'} {this.renderGoToStepButton(2)}</h2>
+                        {this.renderConference(data.conference)}
+                    </section>
+                )}
 
-                <section className="order-review">
-                    <h2>Non-Conference Games {this.renderGoToStepButton(3)}</h2>
-                    {this.renderNonConferenceGames(data.nonConferenceGames)}
-                </section>
+                {!practiceOnly && (
+                    <section className="order-review">
+                        <h2>Non-Conference Games {this.renderGoToStepButton(3)}</h2>
+                        {this.renderNonConferenceGames(data.nonConferenceGames)}
+                    </section>
+                )}
 
                 {/* We don't show the practice material separately because there isn't anything interesting to say about it beyond what's shown on the invoice */}
 

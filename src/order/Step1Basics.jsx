@@ -2,7 +2,7 @@ import React from 'react'
 
 import { v4 as uuid } from 'uuid'
 
-import { Button, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, TextField } from '@mui/material'
+import { Alert, Button, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, TextField } from '@mui/material'
 import validator from 'validator'
 
 import '../App.css'
@@ -72,6 +72,18 @@ export default class Step1Basics extends AbstractStep {
         }
     }
 
+    // override
+    goToNextStep = () => {
+        const { packets, onGoToStep } = this.props
+
+        // If there are no packets available right now, then only practice material can be ordered.
+        if (!packets || packets.length === 0) {
+            onGoToStep(5)
+        } else {
+            super.goToNextStep()
+        }
+    }
+
     determineError = () => {
         const { schoolId, name, emailAddress, isCoach, coachKnows } = this.state
 
@@ -93,13 +105,19 @@ export default class Step1Basics extends AbstractStep {
     nameInputRef = React.createRef()
 
     renderBody = () => {
-        const { schoolsById } = this.props
+        const { schoolsById, practiceOnly } = this.props
         const { schoolId, name, emailAddress, isCoach, coachKnows, showError } = this.state
 
         const error = this.determineError()
 
         return (
             <form onSubmit={this.handleSubmit}>
+                {practiceOnly && (
+                    <Alert severity="info">
+                        <p>Right now, we&rsquo;re only accepting orders for practice material (for just your school to use).</p>
+                        <p>Ordering for conferences and other games between multiple schools will be available in the fall.</p>
+                    </Alert>
+                )}
                 <div className="input-widget-container">
                     <FormControl fullWidth>
                         <FormLabel id="schoolLabel" htmlFor="school" required>

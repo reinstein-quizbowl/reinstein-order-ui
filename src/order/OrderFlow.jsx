@@ -83,7 +83,7 @@ class OrderFlowImpl extends React.PureComponent {
         if (this.state.packets) return
 
         const packets = await Api.get(`/packets?filter=availableForCompetition`, onError)
-        await setStatePromise(this, { packets })
+        await setStatePromise(this, { packets, practiceOnly: !packets || packets.length === 0 })
     }
 
     // If you already have the data, just pass it in. Otherwise, this will do its own load.
@@ -157,7 +157,7 @@ class OrderFlowImpl extends React.PureComponent {
     
     render() {
         const { creationId, onError } = this.props
-        const { year, schoolsById, packets, data, currentStep } = this.state
+        const { year, schoolsById, packets, practiceOnly, data, currentStep } = this.state
 
         const missingBooking = creationId && !data
         if (missingBooking || !year || !schoolsById || !packets) {
@@ -199,6 +199,7 @@ class OrderFlowImpl extends React.PureComponent {
             year,
             schoolsById,
             packets,
+            practiceOnly,
             data,
             dataReloader: this.handleReloadData,
             onError,
@@ -210,18 +211,24 @@ class OrderFlowImpl extends React.PureComponent {
                     onToggleExpansion={hasAssignedPackets || highestSeenStep < 1 ? null : this.handleStepExpansionToggle(1)}
                     {...stepProps}
                 />
-                <Step2Conference
-                    onToggleExpansion={hasAssignedPackets || highestSeenStep < 2 ? null : this.handleStepExpansionToggle(2)}
-                    {...stepProps}
-                />
-                <Step3NonConferenceGames
-                    onToggleExpansion={hasAssignedPackets || highestSeenStep < 3 ? null : this.handleStepExpansionToggle(3)}
-                    {...stepProps}
-                />
-                <Step4CheckPacketAvailability
-                    onToggleExpansion={hasAssignedPackets || highestSeenStep < 4 ? null : this.handleStepExpansionToggle(4)}
-                    {...stepProps}
-                />
+                {!practiceOnly && (
+                    <Step2Conference
+                        onToggleExpansion={hasAssignedPackets || highestSeenStep < 2 ? null : this.handleStepExpansionToggle(2)}
+                        {...stepProps}
+                    />
+                )}
+                {!practiceOnly && (
+                    <Step3NonConferenceGames
+                        onToggleExpansion={hasAssignedPackets || highestSeenStep < 3 ? null : this.handleStepExpansionToggle(3)}
+                        {...stepProps}
+                    />
+                )}
+                {!practiceOnly && (
+                    <Step4CheckPacketAvailability
+                        onToggleExpansion={hasAssignedPackets || highestSeenStep < 4 ? null : this.handleStepExpansionToggle(4)}
+                        {...stepProps}
+                    />
+                )}
                 <Step5PracticeQuestions
                     onToggleExpansion={highestSeenStep < 5 ? null : this.handleStepExpansionToggle(5)}
                     {...stepProps}
