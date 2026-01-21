@@ -32,7 +32,7 @@ class PacketAssignmentsImpl extends React.PureComponent {
 	}
 
 	componentDidMount() {
-    	document.title = 'Packet Assignments \u2013 Reinstein QuizBowl'
+		document.title = 'Packet Assignments \u2013 Reinstein QuizBowl'
 
 		this.loadSchools()
 		this.loadExposures()
@@ -96,7 +96,7 @@ class PacketAssignmentsImpl extends React.PureComponent {
 			return (
 				<TableCell key={key} align="center">
 					<Tooltip title={`${exposure.source} (${exposure.tentativePacketExposure ? 'tentative ' : ''}order placed by ${schoolsById[exposure.ordererSchoolId].shortName})`}>
-						<CheckCircle color="success" />
+						<CheckCircle color="success" fontSize="small" />
 					</Tooltip>
 				</TableCell>
 			)
